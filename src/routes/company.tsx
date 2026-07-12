@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { DashboardShell, type NavItem } from "@/components/DashboardShell";
 import { AuthGate } from "@/components/AuthGate";
-import { LayoutDashboard, Megaphone, Users, Wrench, BookOpen, ListChecks, FileBarChart, Video, LineChart, MessageSquare, CreditCard, Settings } from "lucide-react";
+import { LayoutDashboard, Megaphone, Users, Wrench, BookOpen, ListChecks, FileBarChart, Video, LineChart, MessageSquare, CreditCard, Settings, Briefcase } from "lucide-react";
 
 const nav: NavItem[] = [
   { to: "/company", label: "Overview", icon: LayoutDashboard },
+  { to: "/company/jobs", label: "Jobs", icon: Briefcase },
   { to: "/company/campaigns", label: "Campaigns", icon: Megaphone },
   { to: "/company/candidates", label: "Candidates", icon: Users },
   { to: "/company/challenge-builder", label: "Challenge Builder", icon: Wrench },
