@@ -89,7 +89,7 @@ function BookDemo() {
             ))}
           </ul>
           <div className="mt-10 grid grid-cols-3 gap-4">
-            {[[Calendar, "Avg. 24h", "Response"], [Users, "5k+", "Hires made"], [Building2, "400+", "Companies"]].map(([Icon, v, l], i) => (
+            {[[Calendar, "30 min", "Focused walkthrough"], [Users, "Live", "Product tour"], [Building2, "Custom", "For your team"]].map(([Icon, v, l], i) => (
               <div key={i} className="rounded-xl border border-border p-4">
                 <Icon className="h-4 w-4 text-primary" />
                 <div className="mt-2 text-xl font-semibold">{v as string}</div>
