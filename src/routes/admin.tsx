@@ -354,3 +354,43 @@ function DemosTable({ rows, loading }: { rows: DemoRow[]; loading: boolean }) {
 
 // touch to keep unused import silence-free on some tsconfigs
 void useEffect;
+
+function PartnershipsTable({ rows, loading }: { rows: PartnershipRow[]; loading: boolean }) {
+  const { filtered, setQ } = useSearch(rows, ["organization", "email", "contact_name"]);
+  return (
+    <TableCard count={filtered.length} searchable onSearch={setQ}>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Type</TableHead>
+            <TableHead>Organization</TableHead>
+            <TableHead>Contact</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Country</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Submitted</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {loading ? (
+            <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">Loading…</TableCell></TableRow>
+          ) : filtered.length === 0 ? (
+            <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">No partnership requests yet.</TableCell></TableRow>
+          ) : (
+            filtered.map((r) => (
+              <TableRow key={r.id}>
+                <TableCell><Badge variant="secondary" className="gap-1"><Handshake className="h-3 w-3" /> {r.kind}</Badge></TableCell>
+                <TableCell className="font-medium">{r.organization}</TableCell>
+                <TableCell>{r.contact_name}{r.role_title ? ` · ${r.role_title}` : ""}</TableCell>
+                <TableCell>{r.email}</TableCell>
+                <TableCell>{r.country || "—"}</TableCell>
+                <TableCell><Badge variant={r.status === "approved" ? "default" : r.status === "rejected" ? "destructive" : "secondary"}>{r.status}</Badge></TableCell>
+                <TableCell className="text-muted-foreground">{format(new Date(r.created_at), "PPp")}</TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </TableCard>
+  );
+}
