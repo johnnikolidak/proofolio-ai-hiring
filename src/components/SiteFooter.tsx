@@ -14,21 +14,19 @@ export function SiteFooter() {
           </div>
           <FooterCol title="Product" links={[
             ["Features", "/#features"],
+            ["How it works", "/#how"],
             ["Pricing", "/#pricing"],
-            ["Candidate demo", "/candidate-demo"],
-            ["Company demo", "/company-demo"],
-          ]} />
-          <FooterCol title="Company" links={[
-            ["Book a demo", "/book-demo"],
             ["FAQ", "/#faq"],
-            ["Sign in", "/auth/login"],
-            ["Sign up", "/auth/signup"],
           ]} />
-          <FooterCol title="For" links={[
-            ["Candidates", "/candidate"],
-            ["Companies", "/company"],
-            ["Roadmap", "/candidate/roadmap"],
-            ["Analytics", "/company/analytics"],
+          <FooterCol title="Solutions" links={[
+            ["For candidates", "/for-candidates"],
+            ["For companies", "/for-companies"],
+            ["Book a demo", "/book-demo"],
+          ]} />
+          <FooterCol title="Account" links={[
+            ["Sign in", "/auth/login"],
+            ["Create account", "/auth/signup"],
+            ["Reset password", "/auth/forgot-password"],
           ]} />
         </div>
         <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground md:flex-row md:items-center">
