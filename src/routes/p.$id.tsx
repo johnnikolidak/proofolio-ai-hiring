@@ -58,7 +58,7 @@ function PublicProfile() {
     return () => { cancelled = true; };
   }, [p.avatar_url]);
 
-  const initials = (p.full_name ?? "?").split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
+  const initials = (p.full_name ?? "?").split(" ").map((s: string) => s[0]).slice(0, 2).join("").toUpperCase();
   const skills = (p.skills as string[]) ?? [];
   const roles = (p.preferred_roles as string[]) ?? [];
   const experience = ((p.experience as unknown as Exp[]) ?? []);
