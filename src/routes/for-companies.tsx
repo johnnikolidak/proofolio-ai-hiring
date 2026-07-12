@@ -5,7 +5,6 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
-import { dashboardPathFor } from "@/hooks/use-guest";
 
 export const Route = createFileRoute("/for-companies")({
   component: ForCompanies,

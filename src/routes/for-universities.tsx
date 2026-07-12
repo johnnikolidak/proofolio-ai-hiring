@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
-import { dashboardPathFor } from "@/hooks/use-guest";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/for-universities")({
