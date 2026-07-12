@@ -5,22 +5,19 @@ export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-secondary/40">
       <div className="container-page py-14">
-        <div className="grid gap-10 md:grid-cols-5">
-          <div className="md:col-span-2">
+        <div className="grid gap-10 md:grid-cols-4">
+          <div>
             <Logo />
             <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-              AI-powered skills-based hiring. Real business challenges, not resumes.
+              Hire on proof of skill, not a résumé.
             </p>
           </div>
-          <FooterCol title="Product" links={[
-            ["Features", "/#features"],
-            ["How it works", "/#how"],
-            ["Pricing", "/#pricing"],
-            ["FAQ", "/#faq"],
-          ]} />
-          <FooterCol title="Solutions" links={[
+          <FooterCol title="Platform" links={[
             ["For candidates", "/for-candidates"],
             ["For companies", "/for-companies"],
+            ["For universities", "/for-universities"],
+          ]} />
+          <FooterCol title="Company" links={[
             ["Book a demo", "/book-demo"],
           ]} />
           <FooterCol title="Account" links={[

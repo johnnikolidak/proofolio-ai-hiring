@@ -1,9 +1,10 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard, ShieldCheck } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "./ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { dashboardPathFor } from "@/hooks/use-guest";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -16,10 +17,9 @@ import {
 import { Avatar, AvatarFallback } from "./ui/avatar";
 
 const nav = [
-  { href: "/#features", label: "Features" },
-  { href: "/#how", label: "How it works" },
-  { href: "/#pricing", label: "Pricing" },
-  { href: "/#faq", label: "FAQ" },
+  { href: "/for-candidates", label: "For candidates" },
+  { href: "/for-companies", label: "For companies" },
+  { href: "/for-universities", label: "For universities" },
 ];
 
 export function SiteHeader() {
@@ -27,7 +27,7 @@ export function SiteHeader() {
   const { session, profile, isAdmin, signOut, loading } = useAuth();
   const navigate = useNavigate();
 
-  const dashboardHref = isAdmin ? "/admin" : profile?.role === "company" ? "/company" : "/candidate";
+  const dashboardHref = dashboardPathFor({ isAdmin, role: profile?.role });
   const initials = (profile?.full_name || profile?.email || session?.user?.email || "?")
     .split(" ")
     .map((n) => n[0])
@@ -47,9 +47,9 @@ export function SiteHeader() {
         <Logo />
         <nav className="hidden items-center gap-8 md:flex">
           {nav.map((n) => (
-            <a key={n.href} href={n.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+            <Link key={n.href} to={n.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
               {n.label}
-            </a>
+            </Link>
           ))}
         </nav>
         <div className="hidden items-center gap-2 md:flex">
@@ -74,6 +74,12 @@ export function SiteHeader() {
                   <DropdownMenuItem asChild>
                     <Link to={dashboardHref}>Go to dashboard</Link>
                   </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin"><ShieldCheck className="mr-2 h-4 w-4" /> Admin Console</Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
                     <LogOut className="mr-2 h-4 w-4" /> Sign out
                   </DropdownMenuItem>
@@ -103,9 +109,9 @@ export function SiteHeader() {
         <div className="border-t border-border md:hidden">
           <div className="container-page flex flex-col gap-3 py-4">
             {nav.map((n) => (
-              <a key={n.href} href={n.href} onClick={() => setOpen(false)} className="text-sm text-muted-foreground">
+              <Link key={n.href} to={n.href} onClick={() => setOpen(false)} className="text-sm text-muted-foreground">
                 {n.label}
-              </a>
+              </Link>
             ))}
             <div className="flex gap-2 pt-2">
               {session ? (
@@ -113,16 +119,14 @@ export function SiteHeader() {
                   <Button asChild variant="outline" size="sm" className="flex-1">
                     <Link to={dashboardHref}>Dashboard</Link>
                   </Button>
-                  <Button size="sm" className="flex-1" onClick={handleSignOut}>Sign out</Button>
+                  <Button onClick={handleSignOut} variant="ghost" size="sm">
+                    <LogOut className="h-4 w-4" />
+                  </Button>
                 </>
               ) : (
                 <>
-                  <Button asChild variant="outline" size="sm" className="flex-1">
-                    <Link to="/auth/login">Sign in</Link>
-                  </Button>
-                  <Button asChild size="sm" className="flex-1">
-                    <Link to="/auth/signup">Get started</Link>
-                  </Button>
+                  <Button asChild variant="outline" size="sm" className="flex-1"><Link to="/auth/login">Sign in</Link></Button>
+                  <Button asChild size="sm" className="flex-1"><Link to="/auth/signup">Get started</Link></Button>
                 </>
               )}
             </div>

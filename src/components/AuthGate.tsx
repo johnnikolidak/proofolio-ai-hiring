@@ -2,11 +2,8 @@ import { useEffect, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useAuth, type ProfileRole } from "@/hooks/use-auth";
+import { dashboardPathFor } from "@/hooks/use-guest";
 
-/**
- * Client-side guard for authenticated dashboards.
- * Redirects unauthenticated users to /auth/login and role-mismatched users to their own dashboard.
- */
 export function AuthGate({ children, requiredRole }: { children: ReactNode; requiredRole?: ProfileRole }) {
   const { loading, session, profile, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -18,11 +15,11 @@ export function AuthGate({ children, requiredRole }: { children: ReactNode; requ
       return;
     }
     if (requiredRole === "admin" && !isAdmin) {
-      navigate({ to: profile?.role === "company" ? "/company" : "/candidate" });
+      navigate({ to: dashboardPathFor({ role: profile?.role }) });
       return;
     }
     if (requiredRole && requiredRole !== "admin" && profile && profile.role !== requiredRole && !isAdmin) {
-      navigate({ to: profile.role === "company" ? "/company" : "/candidate" });
+      navigate({ to: dashboardPathFor({ role: profile.role }) });
     }
   }, [loading, session, profile, isAdmin, requiredRole, navigate]);
 

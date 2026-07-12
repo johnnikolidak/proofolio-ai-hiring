@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-export type ProfileRole = "candidate" | "company" | "admin";
+export type ProfileRole = "candidate" | "company" | "university" | "admin";
 
 export type Profile = {
   id: string;
@@ -44,13 +44,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
-
-    // Register listener BEFORE fetching session (per Supabase best practice)
     const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
       if (!mounted) return;
       setSession(next);
       if (next?.user) {
-        // Defer profile fetch to avoid deadlock inside listener
         setTimeout(() => {
           loadProfileAndAdmin(next.user.id).then(({ profile, isAdmin }) => {
             if (!mounted) return;
