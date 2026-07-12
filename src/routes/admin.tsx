@@ -111,10 +111,23 @@ function AdminPage() {
     },
   });
 
+  const partnersQ = useQuery({
+    queryKey: ["admin", "partnerships"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("partnership_requests")
+        .select("id,kind,organization,contact_name,email,role_title,country,status,created_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as PartnershipRow[];
+    },
+  });
+
   const profiles = profilesQ.data ?? [];
   const users = profiles.length;
   const candidates = profiles.filter((p) => p.role === "candidate").length;
   const companies = profiles.filter((p) => p.role === "company").length;
+  const universities = profiles.filter((p) => p.role === "university").length;
 
   const handleSignOut = async () => {
     await signOut();
@@ -147,20 +160,23 @@ function AdminPage() {
           <p className="mt-1 text-sm text-muted-foreground">Signed in as {profile?.email}</p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-5">
           <StatCard label="Total users" value={users} Icon={Users2} loading={profilesQ.isPending} />
           <StatCard label="Candidates" value={candidates} Icon={GraduationCap} loading={profilesQ.isPending} />
           <StatCard label="Companies" value={companies} Icon={Building2} loading={profilesQ.isPending} />
+          <StatCard label="Universities" value={universities} Icon={School} loading={profilesQ.isPending} />
           <StatCard label="Demo requests" value={demosQ.data?.length ?? 0} Icon={Mail} loading={demosQ.isPending} />
         </div>
 
         <Tabs defaultValue="users" className="w-full">
-          <TabsList>
+          <TabsList className="flex flex-wrap h-auto">
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="candidates">Candidates</TabsTrigger>
             <TabsTrigger value="companies">Companies</TabsTrigger>
+            <TabsTrigger value="universities">Universities</TabsTrigger>
             <TabsTrigger value="waitlist">Waitlist ({waitlistQ.data?.length ?? 0})</TabsTrigger>
-            <TabsTrigger value="demos">Demo Requests ({demosQ.data?.length ?? 0})</TabsTrigger>
+            <TabsTrigger value="demos">Demos ({demosQ.data?.length ?? 0})</TabsTrigger>
+            <TabsTrigger value="partnerships">Partnerships ({partnersQ.data?.length ?? 0})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
@@ -172,11 +188,17 @@ function AdminPage() {
           <TabsContent value="companies">
             <ProfilesTable rows={profiles.filter((p) => p.role === "company")} loading={profilesQ.isPending} />
           </TabsContent>
+          <TabsContent value="universities">
+            <ProfilesTable rows={profiles.filter((p) => p.role === "university")} loading={profilesQ.isPending} />
+          </TabsContent>
           <TabsContent value="waitlist">
             <WaitlistTable rows={waitlistQ.data ?? []} loading={waitlistQ.isPending} />
           </TabsContent>
           <TabsContent value="demos">
             <DemosTable rows={demosQ.data ?? []} loading={demosQ.isPending} />
+          </TabsContent>
+          <TabsContent value="partnerships">
+            <PartnershipsTable rows={partnersQ.data ?? []} loading={partnersQ.isPending} />
           </TabsContent>
         </Tabs>
       </main>
