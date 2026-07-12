@@ -104,17 +104,24 @@ function Applicants({ jobId }: { jobId: string }) {
   const q = useQuery({
     queryKey: ["applicants", jobId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: apps, error } = await supabase
         .from("applications")
-        .select("id,status,created_at,cover_note,candidate_id,profiles!inner(full_name,headline,email,is_public,id)")
+        .select("id,status,created_at,cover_note,candidate_id")
         .eq("job_id", jobId)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data ?? [];
+      const ids = (apps ?? []).map((a) => a.candidate_id);
+      let profiles: Array<{ id: string; full_name: string | null; headline: string | null; email: string; is_public: boolean }> = [];
+      if (ids.length) {
+        const { data: pr } = await supabase.from("profiles").select("id,full_name,headline,email,is_public").in("id", ids);
+        profiles = (pr ?? []) as typeof profiles;
+      }
+      const byId = new Map(profiles.map((p) => [p.id, p]));
+      return (apps ?? []).map((a) => ({ ...a, profile: byId.get(a.candidate_id) ?? null }));
     },
   });
   if (q.isLoading) return <div className="mt-4 flex justify-center"><Loader2 className="h-4 w-4 animate-spin text-primary" /></div>;
-  const rows = (q.data ?? []) as Array<{ id: string; status: string; created_at: string; cover_note: string | null; candidate_id: string; profiles: { full_name: string | null; headline: string | null; email: string; is_public: boolean; id: string } | null }>;
+  const rows = q.data ?? [];
   if (rows.length === 0) return <div className="mt-4 rounded-lg border border-dashed border-border p-6 text-center text-xs text-muted-foreground">No applicants yet.</div>;
   return (
     <div className="mt-4 space-y-2">
@@ -122,14 +129,14 @@ function Applicants({ jobId }: { jobId: string }) {
         <div key={r.id} className="rounded-lg border border-border p-3 text-sm">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <div className="font-medium">{r.profiles?.full_name ?? "Anonymous candidate"}</div>
-              <div className="text-xs text-muted-foreground">{r.profiles?.headline ?? r.profiles?.email}</div>
+              <div className="font-medium">{r.profile?.full_name ?? "Anonymous candidate"}</div>
+              <div className="text-xs text-muted-foreground">{r.profile?.headline ?? r.profile?.email}</div>
             </div>
             <Badge variant="secondary" className="rounded-full">{r.status}</Badge>
           </div>
           {r.cover_note && <p className="mt-2 text-xs whitespace-pre-line">{r.cover_note}</p>}
-          {r.profiles?.is_public && (
-            <a href={`/p/${r.profiles.id}`} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs text-primary underline">View proof profile</a>
+          {r.profile?.is_public && (
+            <a href={`/p/${r.profile.id}`} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs text-primary underline">View proof profile</a>
           )}
         </div>
       ))}
