@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as CompanyDemoRouteImport } from './routes/company-demo'
 import { Route as CompanyRouteImport } from './routes/company'
 import { Route as CandidateDemoRouteImport } from './routes/candidate-demo'
@@ -39,6 +40,11 @@ import { Route as AuthSignupRouteImport } from './routes/auth.signup'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompanyDemoRoute = CompanyDemoRouteImport.update({
   id: '/company-demo',
   path: '/company-demo',
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/candidate-demo': typeof CandidateDemoRoute
   '/company': typeof CompanyRouteWithChildren
   '/company-demo': typeof CompanyDemoRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -221,6 +228,7 @@ export interface FileRoutesByTo {
   '/book-demo': typeof BookDemoRoute
   '/candidate-demo': typeof CandidateDemoRoute
   '/company-demo': typeof CompanyDemoRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -253,6 +261,7 @@ export interface FileRoutesById {
   '/candidate-demo': typeof CandidateDemoRoute
   '/company': typeof CompanyRouteWithChildren
   '/company-demo': typeof CompanyDemoRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -286,6 +295,7 @@ export interface FileRouteTypes {
     | '/candidate-demo'
     | '/company'
     | '/company-demo'
+    | '/sitemap.xml'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/signup'
@@ -315,6 +325,7 @@ export interface FileRouteTypes {
     | '/book-demo'
     | '/candidate-demo'
     | '/company-demo'
+    | '/sitemap.xml'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/signup'
@@ -346,6 +357,7 @@ export interface FileRouteTypes {
     | '/candidate-demo'
     | '/company'
     | '/company-demo'
+    | '/sitemap.xml'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/signup'
@@ -378,6 +390,7 @@ export interface RootRouteChildren {
   CandidateDemoRoute: typeof CandidateDemoRoute
   CompanyRoute: typeof CompanyRouteWithChildren
   CompanyDemoRoute: typeof CompanyDemoRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignupRoute: typeof AuthSignupRoute
@@ -386,6 +399,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/company-demo': {
       id: '/company-demo'
       path: '/company-demo'
@@ -656,6 +676,7 @@ const rootRouteChildren: RootRouteChildren = {
   CandidateDemoRoute: CandidateDemoRoute,
   CompanyRoute: CompanyRouteWithChildren,
   CompanyDemoRoute: CompanyDemoRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,
