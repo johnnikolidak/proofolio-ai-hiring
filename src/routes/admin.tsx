@@ -45,7 +45,7 @@ type ProfileRow = {
   id: string;
   email: string;
   full_name: string | null;
-  role: "candidate" | "company" | "admin";
+  role: "candidate" | "company" | "university" | "admin";
   company_name: string | null;
   created_at: string;
 };
@@ -59,6 +59,17 @@ type DemoRow = {
   team_size: string | null;
   hires_per_year: string | null;
   message: string | null;
+  created_at: string;
+};
+type PartnershipRow = {
+  id: string;
+  kind: string;
+  organization: string;
+  contact_name: string;
+  email: string;
+  role_title: string | null;
+  country: string | null;
+  status: string;
   created_at: string;
 };
 
