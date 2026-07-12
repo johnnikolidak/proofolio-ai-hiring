@@ -5,7 +5,6 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
-import { dashboardPathFor } from "@/hooks/use-guest";
 
 export const Route = createFileRoute("/for-companies")({
   component: ForCompanies,
@@ -21,7 +20,7 @@ export const Route = createFileRoute("/for-companies")({
 
 function ForCompanies() {
   const { session, profile, isAdmin } = useAuth();
-  const dash = dashboardPathFor({ isAdmin, role: profile?.role });
+  const isCompany = isAdmin || profile?.role === "company";
   return (
     <div className="min-h-screen">
       <SiteHeader />
@@ -36,12 +35,17 @@ function ForCompanies() {
             Launch skill challenges, get AI-scored candidate reports, and run structured interviews — all in one place.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            {session ? (
-              <Button asChild size="lg"><Link to={dash}>Open dashboard <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
+            {session && isCompany ? (
+              <Button asChild size="lg"><Link to="/company">Open company workspace <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
+            ) : session ? (
+              <>
+                <Button asChild size="lg"><Link to="/book-demo">Book a demo <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
+                <Button asChild size="lg" variant="outline"><Link to="/auth/signup" search={{ role: "company" }}>Create company account</Link></Button>
+              </>
             ) : (
               <>
                 <Button asChild size="lg"><Link to="/book-demo">Book a demo <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
-                <Button asChild size="lg" variant="outline"><Link to="/auth/signup">Start free trial</Link></Button>
+                <Button asChild size="lg" variant="outline"><Link to="/auth/signup" search={{ role: "company" }}>Create company account</Link></Button>
               </>
             )}
           </div>
