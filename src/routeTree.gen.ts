@@ -10,9 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as CompanyDemoRouteImport } from './routes/company-demo'
+import { Route as ForCompaniesRouteImport } from './routes/for-companies'
+import { Route as ForCandidatesRouteImport } from './routes/for-candidates'
 import { Route as CompanyRouteImport } from './routes/company'
-import { Route as CandidateDemoRouteImport } from './routes/candidate-demo'
 import { Route as CandidateRouteImport } from './routes/candidate'
 import { Route as BookDemoRouteImport } from './routes/book-demo'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -47,19 +47,19 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CompanyDemoRoute = CompanyDemoRouteImport.update({
-  id: '/company-demo',
-  path: '/company-demo',
+const ForCompaniesRoute = ForCompaniesRouteImport.update({
+  id: '/for-companies',
+  path: '/for-companies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForCandidatesRoute = ForCandidatesRouteImport.update({
+  id: '/for-candidates',
+  path: '/for-candidates',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompanyRoute = CompanyRouteImport.update({
   id: '/company',
   path: '/company',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CandidateDemoRoute = CandidateDemoRouteImport.update({
-  id: '/candidate-demo',
-  path: '/candidate-demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CandidateRoute = CandidateRouteImport.update({
@@ -208,9 +208,9 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/book-demo': typeof BookDemoRoute
   '/candidate': typeof CandidateRouteWithChildren
-  '/candidate-demo': typeof CandidateDemoRoute
   '/company': typeof CompanyRouteWithChildren
-  '/company-demo': typeof CompanyDemoRoute
+  '/for-candidates': typeof ForCandidatesRoute
+  '/for-companies': typeof ForCompaniesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -241,8 +241,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/book-demo': typeof BookDemoRoute
-  '/candidate-demo': typeof CandidateDemoRoute
-  '/company-demo': typeof CompanyDemoRoute
+  '/for-candidates': typeof ForCandidatesRoute
+  '/for-companies': typeof ForCompaniesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -275,9 +275,9 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/book-demo': typeof BookDemoRoute
   '/candidate': typeof CandidateRouteWithChildren
-  '/candidate-demo': typeof CandidateDemoRoute
   '/company': typeof CompanyRouteWithChildren
-  '/company-demo': typeof CompanyDemoRoute
+  '/for-candidates': typeof ForCandidatesRoute
+  '/for-companies': typeof ForCompaniesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -311,9 +311,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/book-demo'
     | '/candidate'
-    | '/candidate-demo'
     | '/company'
-    | '/company-demo'
+    | '/for-candidates'
+    | '/for-companies'
     | '/sitemap.xml'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -344,8 +344,8 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/book-demo'
-    | '/candidate-demo'
-    | '/company-demo'
+    | '/for-candidates'
+    | '/for-companies'
     | '/sitemap.xml'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -377,9 +377,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/book-demo'
     | '/candidate'
-    | '/candidate-demo'
     | '/company'
-    | '/company-demo'
+    | '/for-candidates'
+    | '/for-companies'
     | '/sitemap.xml'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -412,9 +412,9 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   BookDemoRoute: typeof BookDemoRoute
   CandidateRoute: typeof CandidateRouteWithChildren
-  CandidateDemoRoute: typeof CandidateDemoRoute
   CompanyRoute: typeof CompanyRouteWithChildren
-  CompanyDemoRoute: typeof CompanyDemoRoute
+  ForCandidatesRoute: typeof ForCandidatesRoute
+  ForCompaniesRoute: typeof ForCompaniesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
@@ -432,11 +432,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/company-demo': {
-      id: '/company-demo'
-      path: '/company-demo'
-      fullPath: '/company-demo'
-      preLoaderRoute: typeof CompanyDemoRouteImport
+    '/for-companies': {
+      id: '/for-companies'
+      path: '/for-companies'
+      fullPath: '/for-companies'
+      preLoaderRoute: typeof ForCompaniesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for-candidates': {
+      id: '/for-candidates'
+      path: '/for-candidates'
+      fullPath: '/for-candidates'
+      preLoaderRoute: typeof ForCandidatesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/company': {
@@ -444,13 +451,6 @@ declare module '@tanstack/react-router' {
       path: '/company'
       fullPath: '/company'
       preLoaderRoute: typeof CompanyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/candidate-demo': {
-      id: '/candidate-demo'
-      path: '/candidate-demo'
-      fullPath: '/candidate-demo'
-      preLoaderRoute: typeof CandidateDemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/candidate': {
@@ -714,9 +714,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   BookDemoRoute: BookDemoRoute,
   CandidateRoute: CandidateRouteWithChildren,
-  CandidateDemoRoute: CandidateDemoRoute,
   CompanyRoute: CompanyRouteWithChildren,
-  CompanyDemoRoute: CompanyDemoRoute,
+  ForCandidatesRoute: ForCandidatesRoute,
+  ForCompaniesRoute: ForCompaniesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
@@ -727,13 +727,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

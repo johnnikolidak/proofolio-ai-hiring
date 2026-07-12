@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-export const Route = createFileRoute("/company-demo")({
+export const Route = createFileRoute("/for-companies")({
   component: CompanyDemo,
   head: () => ({
     meta: [
