@@ -24,20 +24,14 @@ export function AuthLayout({ title, subtitle, children, footer }: { title: strin
           <div />
           <div className="max-w-md">
             <blockquote className="text-2xl font-medium leading-snug tracking-tight">
-              "We replaced 8 rounds of interviews with a single Proofolio challenge. Time-to-hire dropped by 71% and quality went up."
+              "Proof beats pedigree. Real work speaks louder than a résumé ever could."
             </blockquote>
-            <div className="mt-6 flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-primary-foreground/20" />
-              <div>
-                <div className="text-sm font-semibold">Amelia Chen</div>
-                <div className="text-xs opacity-80">Head of Talent, Northwind Labs</div>
-              </div>
-            </div>
+            <p className="mt-4 text-sm opacity-80">— The Proofolio team</p>
           </div>
           <div className="flex items-center gap-6 text-xs opacity-70">
-            <span>SOC 2 Type II</span>
-            <span>GDPR ready</span>
-            <span>Used by 400+ teams</span>
+            <span>Skills-first hiring</span>
+            <span>Evidence-based</span>
+            <span>Built in Europe</span>
           </div>
         </div>
       </div>

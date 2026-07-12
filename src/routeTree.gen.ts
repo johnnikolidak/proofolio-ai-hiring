@@ -9,7 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UniversityRouteImport } from './routes/university'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ForUniversitiesRouteImport } from './routes/for-universities'
 import { Route as ForCompaniesRouteImport } from './routes/for-companies'
 import { Route as ForCandidatesRouteImport } from './routes/for-candidates'
 import { Route as CompanyRouteImport } from './routes/company'
@@ -17,8 +19,18 @@ import { Route as CandidateRouteImport } from './routes/candidate'
 import { Route as BookDemoRouteImport } from './routes/book-demo'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UniversityIndexRouteImport } from './routes/university.index'
 import { Route as CompanyIndexRouteImport } from './routes/company.index'
 import { Route as CandidateIndexRouteImport } from './routes/candidate.index'
+import { Route as UniversityStudentsRouteImport } from './routes/university.students'
+import { Route as UniversitySettingsRouteImport } from './routes/university.settings'
+import { Route as UniversityPartnershipsRouteImport } from './routes/university.partnerships'
+import { Route as UniversityMessagesRouteImport } from './routes/university.messages'
+import { Route as UniversityLeaderboardsRouteImport } from './routes/university.leaderboards'
+import { Route as UniversityEvidenceRouteImport } from './routes/university.evidence'
+import { Route as UniversityChallengesRouteImport } from './routes/university.challenges'
+import { Route as UniversityCertificatesRouteImport } from './routes/university.certificates'
+import { Route as UniversityAnalyticsRouteImport } from './routes/university.analytics'
 import { Route as CompanyShortlistsRouteImport } from './routes/company.shortlists'
 import { Route as CompanySettingsRouteImport } from './routes/company.settings'
 import { Route as CompanyReportsRouteImport } from './routes/company.reports'
@@ -47,9 +59,19 @@ import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-passw
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
 
+const UniversityRoute = UniversityRouteImport.update({
+  id: '/university',
+  path: '/university',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForUniversitiesRoute = ForUniversitiesRouteImport.update({
+  id: '/for-universities',
+  path: '/for-universities',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForCompaniesRoute = ForCompaniesRouteImport.update({
@@ -87,6 +109,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UniversityIndexRoute = UniversityIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => UniversityRoute,
+} as any)
 const CompanyIndexRoute = CompanyIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -96,6 +123,51 @@ const CandidateIndexRoute = CandidateIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CandidateRoute,
+} as any)
+const UniversityStudentsRoute = UniversityStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => UniversityRoute,
+} as any)
+const UniversitySettingsRoute = UniversitySettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => UniversityRoute,
+} as any)
+const UniversityPartnershipsRoute = UniversityPartnershipsRouteImport.update({
+  id: '/partnerships',
+  path: '/partnerships',
+  getParentRoute: () => UniversityRoute,
+} as any)
+const UniversityMessagesRoute = UniversityMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => UniversityRoute,
+} as any)
+const UniversityLeaderboardsRoute = UniversityLeaderboardsRouteImport.update({
+  id: '/leaderboards',
+  path: '/leaderboards',
+  getParentRoute: () => UniversityRoute,
+} as any)
+const UniversityEvidenceRoute = UniversityEvidenceRouteImport.update({
+  id: '/evidence',
+  path: '/evidence',
+  getParentRoute: () => UniversityRoute,
+} as any)
+const UniversityChallengesRoute = UniversityChallengesRouteImport.update({
+  id: '/challenges',
+  path: '/challenges',
+  getParentRoute: () => UniversityRoute,
+} as any)
+const UniversityCertificatesRoute = UniversityCertificatesRouteImport.update({
+  id: '/certificates',
+  path: '/certificates',
+  getParentRoute: () => UniversityRoute,
+} as any)
+const UniversityAnalyticsRoute = UniversityAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => UniversityRoute,
 } as any)
 const CompanyShortlistsRoute = CompanyShortlistsRouteImport.update({
   id: '/shortlists',
@@ -241,7 +313,9 @@ export interface FileRoutesByFullPath {
   '/company': typeof CompanyRouteWithChildren
   '/for-candidates': typeof ForCandidatesRoute
   '/for-companies': typeof ForCompaniesRoute
+  '/for-universities': typeof ForUniversitiesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/university': typeof UniversityRouteWithChildren
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -269,8 +343,18 @@ export interface FileRoutesByFullPath {
   '/company/reports': typeof CompanyReportsRoute
   '/company/settings': typeof CompanySettingsRoute
   '/company/shortlists': typeof CompanyShortlistsRoute
+  '/university/analytics': typeof UniversityAnalyticsRoute
+  '/university/certificates': typeof UniversityCertificatesRoute
+  '/university/challenges': typeof UniversityChallengesRoute
+  '/university/evidence': typeof UniversityEvidenceRoute
+  '/university/leaderboards': typeof UniversityLeaderboardsRoute
+  '/university/messages': typeof UniversityMessagesRoute
+  '/university/partnerships': typeof UniversityPartnershipsRoute
+  '/university/settings': typeof UniversitySettingsRoute
+  '/university/students': typeof UniversityStudentsRoute
   '/candidate/': typeof CandidateIndexRoute
   '/company/': typeof CompanyIndexRoute
+  '/university/': typeof UniversityIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -278,6 +362,7 @@ export interface FileRoutesByTo {
   '/book-demo': typeof BookDemoRoute
   '/for-candidates': typeof ForCandidatesRoute
   '/for-companies': typeof ForCompaniesRoute
+  '/for-universities': typeof ForUniversitiesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -306,8 +391,18 @@ export interface FileRoutesByTo {
   '/company/reports': typeof CompanyReportsRoute
   '/company/settings': typeof CompanySettingsRoute
   '/company/shortlists': typeof CompanyShortlistsRoute
+  '/university/analytics': typeof UniversityAnalyticsRoute
+  '/university/certificates': typeof UniversityCertificatesRoute
+  '/university/challenges': typeof UniversityChallengesRoute
+  '/university/evidence': typeof UniversityEvidenceRoute
+  '/university/leaderboards': typeof UniversityLeaderboardsRoute
+  '/university/messages': typeof UniversityMessagesRoute
+  '/university/partnerships': typeof UniversityPartnershipsRoute
+  '/university/settings': typeof UniversitySettingsRoute
+  '/university/students': typeof UniversityStudentsRoute
   '/candidate': typeof CandidateIndexRoute
   '/company': typeof CompanyIndexRoute
+  '/university': typeof UniversityIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -318,7 +413,9 @@ export interface FileRoutesById {
   '/company': typeof CompanyRouteWithChildren
   '/for-candidates': typeof ForCandidatesRoute
   '/for-companies': typeof ForCompaniesRoute
+  '/for-universities': typeof ForUniversitiesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/university': typeof UniversityRouteWithChildren
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -346,8 +443,18 @@ export interface FileRoutesById {
   '/company/reports': typeof CompanyReportsRoute
   '/company/settings': typeof CompanySettingsRoute
   '/company/shortlists': typeof CompanyShortlistsRoute
+  '/university/analytics': typeof UniversityAnalyticsRoute
+  '/university/certificates': typeof UniversityCertificatesRoute
+  '/university/challenges': typeof UniversityChallengesRoute
+  '/university/evidence': typeof UniversityEvidenceRoute
+  '/university/leaderboards': typeof UniversityLeaderboardsRoute
+  '/university/messages': typeof UniversityMessagesRoute
+  '/university/partnerships': typeof UniversityPartnershipsRoute
+  '/university/settings': typeof UniversitySettingsRoute
+  '/university/students': typeof UniversityStudentsRoute
   '/candidate/': typeof CandidateIndexRoute
   '/company/': typeof CompanyIndexRoute
+  '/university/': typeof UniversityIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -359,7 +466,9 @@ export interface FileRouteTypes {
     | '/company'
     | '/for-candidates'
     | '/for-companies'
+    | '/for-universities'
     | '/sitemap.xml'
+    | '/university'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -387,8 +496,18 @@ export interface FileRouteTypes {
     | '/company/reports'
     | '/company/settings'
     | '/company/shortlists'
+    | '/university/analytics'
+    | '/university/certificates'
+    | '/university/challenges'
+    | '/university/evidence'
+    | '/university/leaderboards'
+    | '/university/messages'
+    | '/university/partnerships'
+    | '/university/settings'
+    | '/university/students'
     | '/candidate/'
     | '/company/'
+    | '/university/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -396,6 +515,7 @@ export interface FileRouteTypes {
     | '/book-demo'
     | '/for-candidates'
     | '/for-companies'
+    | '/for-universities'
     | '/sitemap.xml'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -424,8 +544,18 @@ export interface FileRouteTypes {
     | '/company/reports'
     | '/company/settings'
     | '/company/shortlists'
+    | '/university/analytics'
+    | '/university/certificates'
+    | '/university/challenges'
+    | '/university/evidence'
+    | '/university/leaderboards'
+    | '/university/messages'
+    | '/university/partnerships'
+    | '/university/settings'
+    | '/university/students'
     | '/candidate'
     | '/company'
+    | '/university'
   id:
     | '__root__'
     | '/'
@@ -435,7 +565,9 @@ export interface FileRouteTypes {
     | '/company'
     | '/for-candidates'
     | '/for-companies'
+    | '/for-universities'
     | '/sitemap.xml'
+    | '/university'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -463,8 +595,18 @@ export interface FileRouteTypes {
     | '/company/reports'
     | '/company/settings'
     | '/company/shortlists'
+    | '/university/analytics'
+    | '/university/certificates'
+    | '/university/challenges'
+    | '/university/evidence'
+    | '/university/leaderboards'
+    | '/university/messages'
+    | '/university/partnerships'
+    | '/university/settings'
+    | '/university/students'
     | '/candidate/'
     | '/company/'
+    | '/university/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -475,7 +617,9 @@ export interface RootRouteChildren {
   CompanyRoute: typeof CompanyRouteWithChildren
   ForCandidatesRoute: typeof ForCandidatesRoute
   ForCompaniesRoute: typeof ForCompaniesRoute
+  ForUniversitiesRoute: typeof ForUniversitiesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  UniversityRoute: typeof UniversityRouteWithChildren
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
@@ -485,11 +629,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/university': {
+      id: '/university'
+      path: '/university'
+      fullPath: '/university'
+      preLoaderRoute: typeof UniversityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for-universities': {
+      id: '/for-universities'
+      path: '/for-universities'
+      fullPath: '/for-universities'
+      preLoaderRoute: typeof ForUniversitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/for-companies': {
@@ -541,6 +699,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/university/': {
+      id: '/university/'
+      path: '/'
+      fullPath: '/university/'
+      preLoaderRoute: typeof UniversityIndexRouteImport
+      parentRoute: typeof UniversityRoute
+    }
     '/company/': {
       id: '/company/'
       path: '/'
@@ -554,6 +719,69 @@ declare module '@tanstack/react-router' {
       fullPath: '/candidate/'
       preLoaderRoute: typeof CandidateIndexRouteImport
       parentRoute: typeof CandidateRoute
+    }
+    '/university/students': {
+      id: '/university/students'
+      path: '/students'
+      fullPath: '/university/students'
+      preLoaderRoute: typeof UniversityStudentsRouteImport
+      parentRoute: typeof UniversityRoute
+    }
+    '/university/settings': {
+      id: '/university/settings'
+      path: '/settings'
+      fullPath: '/university/settings'
+      preLoaderRoute: typeof UniversitySettingsRouteImport
+      parentRoute: typeof UniversityRoute
+    }
+    '/university/partnerships': {
+      id: '/university/partnerships'
+      path: '/partnerships'
+      fullPath: '/university/partnerships'
+      preLoaderRoute: typeof UniversityPartnershipsRouteImport
+      parentRoute: typeof UniversityRoute
+    }
+    '/university/messages': {
+      id: '/university/messages'
+      path: '/messages'
+      fullPath: '/university/messages'
+      preLoaderRoute: typeof UniversityMessagesRouteImport
+      parentRoute: typeof UniversityRoute
+    }
+    '/university/leaderboards': {
+      id: '/university/leaderboards'
+      path: '/leaderboards'
+      fullPath: '/university/leaderboards'
+      preLoaderRoute: typeof UniversityLeaderboardsRouteImport
+      parentRoute: typeof UniversityRoute
+    }
+    '/university/evidence': {
+      id: '/university/evidence'
+      path: '/evidence'
+      fullPath: '/university/evidence'
+      preLoaderRoute: typeof UniversityEvidenceRouteImport
+      parentRoute: typeof UniversityRoute
+    }
+    '/university/challenges': {
+      id: '/university/challenges'
+      path: '/challenges'
+      fullPath: '/university/challenges'
+      preLoaderRoute: typeof UniversityChallengesRouteImport
+      parentRoute: typeof UniversityRoute
+    }
+    '/university/certificates': {
+      id: '/university/certificates'
+      path: '/certificates'
+      fullPath: '/university/certificates'
+      preLoaderRoute: typeof UniversityCertificatesRouteImport
+      parentRoute: typeof UniversityRoute
+    }
+    '/university/analytics': {
+      id: '/university/analytics'
+      path: '/analytics'
+      fullPath: '/university/analytics'
+      preLoaderRoute: typeof UniversityAnalyticsRouteImport
+      parentRoute: typeof UniversityRoute
     }
     '/company/shortlists': {
       id: '/company/shortlists'
@@ -814,6 +1042,36 @@ const CompanyRouteChildren: CompanyRouteChildren = {
 const CompanyRouteWithChildren =
   CompanyRoute._addFileChildren(CompanyRouteChildren)
 
+interface UniversityRouteChildren {
+  UniversityAnalyticsRoute: typeof UniversityAnalyticsRoute
+  UniversityCertificatesRoute: typeof UniversityCertificatesRoute
+  UniversityChallengesRoute: typeof UniversityChallengesRoute
+  UniversityEvidenceRoute: typeof UniversityEvidenceRoute
+  UniversityLeaderboardsRoute: typeof UniversityLeaderboardsRoute
+  UniversityMessagesRoute: typeof UniversityMessagesRoute
+  UniversityPartnershipsRoute: typeof UniversityPartnershipsRoute
+  UniversitySettingsRoute: typeof UniversitySettingsRoute
+  UniversityStudentsRoute: typeof UniversityStudentsRoute
+  UniversityIndexRoute: typeof UniversityIndexRoute
+}
+
+const UniversityRouteChildren: UniversityRouteChildren = {
+  UniversityAnalyticsRoute: UniversityAnalyticsRoute,
+  UniversityCertificatesRoute: UniversityCertificatesRoute,
+  UniversityChallengesRoute: UniversityChallengesRoute,
+  UniversityEvidenceRoute: UniversityEvidenceRoute,
+  UniversityLeaderboardsRoute: UniversityLeaderboardsRoute,
+  UniversityMessagesRoute: UniversityMessagesRoute,
+  UniversityPartnershipsRoute: UniversityPartnershipsRoute,
+  UniversitySettingsRoute: UniversitySettingsRoute,
+  UniversityStudentsRoute: UniversityStudentsRoute,
+  UniversityIndexRoute: UniversityIndexRoute,
+}
+
+const UniversityRouteWithChildren = UniversityRoute._addFileChildren(
+  UniversityRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
@@ -822,7 +1080,9 @@ const rootRouteChildren: RootRouteChildren = {
   CompanyRoute: CompanyRouteWithChildren,
   ForCandidatesRoute: ForCandidatesRoute,
   ForCompaniesRoute: ForCompaniesRoute,
+  ForUniversitiesRoute: ForUniversitiesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  UniversityRoute: UniversityRouteWithChildren,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,

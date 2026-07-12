@@ -14,6 +14,104 @@ export type Database = {
   }
   public: {
     Tables: {
+      campaigns: {
+        Row: {
+          challenge_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          owner_id: string
+          role: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          challenge_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_id: string
+          role?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          challenge_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_id?: string
+          role?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          context: string | null
+          created_at: string
+          deliverables: string | null
+          difficulty: string | null
+          duration_hours: number | null
+          evaluation_criteria: string | null
+          evidence_dimensions: string[] | null
+          id: string
+          industry: string | null
+          owner_id: string
+          role: string | null
+          status: string
+          task: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string
+          deliverables?: string | null
+          difficulty?: string | null
+          duration_hours?: number | null
+          evaluation_criteria?: string | null
+          evidence_dimensions?: string[] | null
+          id?: string
+          industry?: string | null
+          owner_id: string
+          role?: string | null
+          status?: string
+          task?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          context?: string | null
+          created_at?: string
+          deliverables?: string | null
+          difficulty?: string | null
+          duration_hours?: number | null
+          evaluation_criteria?: string | null
+          evidence_dimensions?: string[] | null
+          id?: string
+          industry?: string | null
+          owner_id?: string
+          role?: string | null
+          status?: string
+          task?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       demo_requests: {
         Row: {
           company: string
@@ -50,6 +148,51 @@ export type Database = {
         }
         Relationships: []
       }
+      partnership_requests: {
+        Row: {
+          contact_name: string
+          country: string | null
+          created_at: string
+          email: string
+          id: string
+          kind: string
+          message: string | null
+          organization: string
+          role_title: string | null
+          status: string
+          students_or_hires: string | null
+          updated_at: string
+        }
+        Insert: {
+          contact_name: string
+          country?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          kind: string
+          message?: string | null
+          organization: string
+          role_title?: string | null
+          status?: string
+          students_or_hires?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contact_name?: string
+          country?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          kind?: string
+          message?: string | null
+          organization?: string
+          role_title?: string | null
+          status?: string
+          students_or_hires?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -82,6 +225,63 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      submissions: {
+        Row: {
+          campaign_id: string | null
+          candidate_id: string
+          challenge_id: string
+          content: string | null
+          created_at: string
+          feedback: string | null
+          file_url: string | null
+          id: string
+          score: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          candidate_id: string
+          challenge_id: string
+          content?: string | null
+          created_at?: string
+          feedback?: string | null
+          file_url?: string | null
+          id?: string
+          score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string | null
+          candidate_id?: string
+          challenge_id?: string
+          content?: string | null
+          created_at?: string
+          feedback?: string | null
+          file_url?: string | null
+          id?: string
+          score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -142,7 +342,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "candidate" | "company"
+      app_role: "admin" | "candidate" | "company" | "university"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -270,7 +470,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "candidate", "company"],
+      app_role: ["admin", "candidate", "company", "university"],
     },
   },
 } as const

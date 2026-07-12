@@ -7,9 +7,11 @@ import {
   ArrowLeft,
   Building2,
   GraduationCap,
+  Handshake,
   Loader2,
   LogOut,
   Mail,
+  School,
   ShieldCheck,
   Users2,
 } from "lucide-react";
@@ -43,7 +45,7 @@ type ProfileRow = {
   id: string;
   email: string;
   full_name: string | null;
-  role: "candidate" | "company" | "admin";
+  role: "candidate" | "company" | "university" | "admin";
   company_name: string | null;
   created_at: string;
 };
@@ -57,6 +59,17 @@ type DemoRow = {
   team_size: string | null;
   hires_per_year: string | null;
   message: string | null;
+  created_at: string;
+};
+type PartnershipRow = {
+  id: string;
+  kind: string;
+  organization: string;
+  contact_name: string;
+  email: string;
+  role_title: string | null;
+  country: string | null;
+  status: string;
   created_at: string;
 };
 
@@ -98,10 +111,23 @@ function AdminPage() {
     },
   });
 
+  const partnersQ = useQuery({
+    queryKey: ["admin", "partnerships"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("partnership_requests")
+        .select("id,kind,organization,contact_name,email,role_title,country,status,created_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as PartnershipRow[];
+    },
+  });
+
   const profiles = profilesQ.data ?? [];
   const users = profiles.length;
   const candidates = profiles.filter((p) => p.role === "candidate").length;
   const companies = profiles.filter((p) => p.role === "company").length;
+  const universities = profiles.filter((p) => p.role === "university").length;
 
   const handleSignOut = async () => {
     await signOut();
@@ -134,20 +160,23 @@ function AdminPage() {
           <p className="mt-1 text-sm text-muted-foreground">Signed in as {profile?.email}</p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-5">
           <StatCard label="Total users" value={users} Icon={Users2} loading={profilesQ.isPending} />
           <StatCard label="Candidates" value={candidates} Icon={GraduationCap} loading={profilesQ.isPending} />
           <StatCard label="Companies" value={companies} Icon={Building2} loading={profilesQ.isPending} />
+          <StatCard label="Universities" value={universities} Icon={School} loading={profilesQ.isPending} />
           <StatCard label="Demo requests" value={demosQ.data?.length ?? 0} Icon={Mail} loading={demosQ.isPending} />
         </div>
 
         <Tabs defaultValue="users" className="w-full">
-          <TabsList>
+          <TabsList className="flex flex-wrap h-auto">
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="candidates">Candidates</TabsTrigger>
             <TabsTrigger value="companies">Companies</TabsTrigger>
+            <TabsTrigger value="universities">Universities</TabsTrigger>
             <TabsTrigger value="waitlist">Waitlist ({waitlistQ.data?.length ?? 0})</TabsTrigger>
-            <TabsTrigger value="demos">Demo Requests ({demosQ.data?.length ?? 0})</TabsTrigger>
+            <TabsTrigger value="demos">Demos ({demosQ.data?.length ?? 0})</TabsTrigger>
+            <TabsTrigger value="partnerships">Partnerships ({partnersQ.data?.length ?? 0})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
@@ -159,11 +188,17 @@ function AdminPage() {
           <TabsContent value="companies">
             <ProfilesTable rows={profiles.filter((p) => p.role === "company")} loading={profilesQ.isPending} />
           </TabsContent>
+          <TabsContent value="universities">
+            <ProfilesTable rows={profiles.filter((p) => p.role === "university")} loading={profilesQ.isPending} />
+          </TabsContent>
           <TabsContent value="waitlist">
             <WaitlistTable rows={waitlistQ.data ?? []} loading={waitlistQ.isPending} />
           </TabsContent>
           <TabsContent value="demos">
             <DemosTable rows={demosQ.data ?? []} loading={demosQ.isPending} />
+          </TabsContent>
+          <TabsContent value="partnerships">
+            <PartnershipsTable rows={partnersQ.data ?? []} loading={partnersQ.isPending} />
           </TabsContent>
         </Tabs>
       </main>
@@ -319,3 +354,43 @@ function DemosTable({ rows, loading }: { rows: DemoRow[]; loading: boolean }) {
 
 // touch to keep unused import silence-free on some tsconfigs
 void useEffect;
+
+function PartnershipsTable({ rows, loading }: { rows: PartnershipRow[]; loading: boolean }) {
+  const { filtered, setQ } = useSearch(rows, ["organization", "email", "contact_name"]);
+  return (
+    <TableCard count={filtered.length} searchable onSearch={setQ}>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Type</TableHead>
+            <TableHead>Organization</TableHead>
+            <TableHead>Contact</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Country</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Submitted</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {loading ? (
+            <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">Loading…</TableCell></TableRow>
+          ) : filtered.length === 0 ? (
+            <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">No partnership requests yet.</TableCell></TableRow>
+          ) : (
+            filtered.map((r) => (
+              <TableRow key={r.id}>
+                <TableCell><Badge variant="secondary" className="gap-1"><Handshake className="h-3 w-3" /> {r.kind}</Badge></TableCell>
+                <TableCell className="font-medium">{r.organization}</TableCell>
+                <TableCell>{r.contact_name}{r.role_title ? ` · ${r.role_title}` : ""}</TableCell>
+                <TableCell>{r.email}</TableCell>
+                <TableCell>{r.country || "—"}</TableCell>
+                <TableCell><Badge variant={r.status === "approved" ? "default" : r.status === "rejected" ? "destructive" : "secondary"}>{r.status}</Badge></TableCell>
+                <TableCell className="text-muted-foreground">{format(new Date(r.created_at), "PPp")}</TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </TableCard>
+  );
+}

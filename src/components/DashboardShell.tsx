@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState, type ComponentType, type ReactNode } from "react";
-import { Bell, ChevronDown, LogOut, Menu, Search, X } from "lucide-react";
+import { Bell, ChevronDown, LogOut, Menu, Search, ShieldCheck, X } from "lucide-react";
 import { Logo } from "./Logo";
 import { Input } from "./ui/input";
 import { Avatar, AvatarFallback } from "./ui/avatar";
@@ -27,10 +27,10 @@ export function DashboardShell({
   role,
 }: {
   nav: NavItem[];
-  role: "Candidate" | "Company" | "Admin";
+  role: "Candidate" | "Company" | "University" | "Admin";
 }) {
   const [open, setOpen] = useState(false);
-  const { profile, user, signOut } = useAuth();
+  const { profile, user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
 
   const displayName = profile?.full_name || profile?.email || user?.email || "Account";
@@ -67,7 +67,7 @@ export function DashboardShell({
             <div className="font-medium">{role} account</div>
           </div>
         </div>
-        <nav className="flex flex-col gap-0.5 p-2">
+        <nav className="flex flex-col gap-0.5 p-2 overflow-y-auto max-h-[calc(100vh-15rem)]">
           {nav.map((item) => (
             <SideLink key={item.to} item={item} onNavigate={() => setOpen(false)} />
           ))}
@@ -90,6 +90,15 @@ export function DashboardShell({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>Signed in as {displayEmail}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {isAdmin && (
+                <DropdownMenuItem asChild>
+                  <Link to="/admin"><ShieldCheck className="mr-2 h-4 w-4" /> Admin Console</Link>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem asChild>
+                <Link to="/">Back to site</Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
                 <LogOut className="mr-2 h-4 w-4" /> Sign out
@@ -117,10 +126,7 @@ export function DashboardShell({
               <Bell className="h-4 w-4" />
               <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary" />
             </button>
-            <Link
-              to="/"
-              className="hidden md:inline-flex text-xs text-muted-foreground transition-colors hover:text-foreground"
-            >
+            <Link to="/" className="hidden md:inline-flex text-xs text-muted-foreground transition-colors hover:text-foreground">
               ← Back to site
             </Link>
           </div>
@@ -135,9 +141,8 @@ export function DashboardShell({
 
 function SideLink({ item, onNavigate }: { item: NavItem; onNavigate: () => void }) {
   const location = useLocation();
-  const active =
-    location.pathname === item.to ||
-    (item.to !== "/candidate" && item.to !== "/company" && item.to !== "/admin" && location.pathname.startsWith(item.to));
+  const isRoot = ["/candidate", "/company", "/university", "/admin"].includes(item.to);
+  const active = location.pathname === item.to || (!isRoot && location.pathname.startsWith(item.to));
   const Icon = item.icon;
   return (
     <Link

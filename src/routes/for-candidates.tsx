@@ -54,7 +54,7 @@ function ForCandidates() {
             [Sparkles, "AI-scored challenges", "Get feedback on every submission with a transparent, evidence-based rubric."],
             [Brain, "AI interview coach", "Practice with an adaptive interviewer trained on the job you're targeting."],
             [Rocket, "Personal roadmap", "Turn every challenge into measurable skill progression tracked over time."],
-            [Award, "Verified certificates", "Shareable proof of skill you own — recognized by 400+ hiring teams."],
+            [Award, "Verified certificates", "Shareable proof of skill you own — every certificate has a public verification URL."],
           ].map(([Icon, t, d]) => (
             <div key={t as string} className="rounded-2xl border border-border bg-card p-6 transition-all hover:shadow-elev">
               <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary-soft text-primary">

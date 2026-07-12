@@ -2,27 +2,21 @@ import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "./use-auth";
 
-/**
- * Redirects a signed-in visitor away from guest-only pages (login, signup,
- * verify-email, forgot-password) to the dashboard that matches their role.
- * Prevents auth loops where an authenticated user is bounced back to the sign-up form.
- */
+export function dashboardPathFor(opts: { isAdmin?: boolean; role?: string | null }) {
+  // Admin does NOT hijack — role still owns the primary workspace. Admin Console is a menu item.
+  if (opts.role === "company") return "/company";
+  if (opts.role === "university") return "/university";
+  if (opts.role === "candidate") return "/candidate";
+  if (opts.isAdmin) return "/admin";
+  return "/candidate";
+}
+
 export function useRedirectIfAuthed() {
   const { loading, session, profile, isAdmin } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
     if (loading || !session) return;
-    const dest = isAdmin
-      ? "/admin"
-      : profile?.role === "company"
-        ? "/company"
-        : "/candidate";
+    const dest = dashboardPathFor({ isAdmin, role: profile?.role });
     navigate({ to: dest, replace: true });
   }, [loading, session, profile, isAdmin, navigate]);
-}
-
-export function dashboardPathFor(opts: { isAdmin: boolean; role?: string | null }) {
-  if (opts.isAdmin) return "/admin";
-  if (opts.role === "company") return "/company";
-  return "/candidate";
 }

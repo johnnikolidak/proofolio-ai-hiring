@@ -1,8 +1,8 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { GraduationCap, Building2, Loader2 } from "lucide-react";
+import { GraduationCap, Building2, School, Loader2 } from "lucide-react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,8 +10,14 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useRedirectIfAuthed } from "@/hooks/use-guest";
 
+type SignupSearch = { role?: "candidate" | "company" | "university"; email?: string };
+
 export const Route = createFileRoute("/auth/signup")({
   component: SignUp,
+  validateSearch: (s: Record<string, unknown>): SignupSearch => ({
+    role: (["candidate", "company", "university"] as const).includes(s.role as never) ? (s.role as SignupSearch["role"]) : undefined,
+    email: typeof s.email === "string" ? s.email : undefined,
+  }),
   head: () => ({ meta: [{ title: "Sign up — Proofolio" }] }),
 });
 
@@ -25,9 +31,14 @@ const schema = z.object({
 
 function SignUp() {
   useRedirectIfAuthed();
-  const [role, setRole] = useState<"candidate" | "company">("candidate");
+  const search = useSearch({ from: "/auth/signup" }) as SignupSearch;
+  const [role, setRole] = useState<"candidate" | "company" | "university">(search.role ?? "candidate");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => { if (search.role) setRole(search.role); }, [search.role]);
+
+  const orgLabel = role === "company" ? "Company" : role === "university" ? "University / institution" : null;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,14 +54,14 @@ function SignUp() {
       toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
-    if (role === "company" && !parsed.data.company_name) {
-      toast.error("Company name is required for company accounts");
+    if ((role === "company" || role === "university") && !parsed.data.company_name) {
+      toast.error(`${orgLabel} name is required`);
       return;
     }
 
     setLoading(true);
     const emailRedirectTo = `${window.location.origin}/auth/verify-email`;
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
@@ -58,7 +69,7 @@ function SignUp() {
         data: {
           role,
           full_name: `${parsed.data.first_name} ${parsed.data.last_name}`.trim(),
-          company_name: role === "company" ? parsed.data.company_name : null,
+          company_name: role !== "candidate" ? parsed.data.company_name : null,
         },
       },
     });
@@ -75,22 +86,22 @@ function SignUp() {
 
     toast.success("Account created — check your inbox to verify your email.");
     navigate({ to: "/auth/verify-email", search: { email: parsed.data.email } as never });
-
-    // Silence "unused" — data may include a session in some Supabase configs.
-    void data;
   };
+
+  const roles = [
+    { key: "candidate" as const, Icon: GraduationCap, label: "I'm a candidate", desc: "Free forever" },
+    { key: "company" as const, Icon: Building2, label: "I'm hiring", desc: "For teams" },
+    { key: "university" as const, Icon: School, label: "I'm a university", desc: "For institutions" },
+  ];
 
   return (
     <AuthLayout
       title="Create your account"
-      subtitle="Free for candidates. 14-day trial for teams."
+      subtitle="One platform. Three experiences. Pick yours."
       footer={<>Already have an account? <Link to="/auth/login" className="font-medium text-primary hover:underline">Sign in</Link></>}
     >
-      <div className="mb-5 grid grid-cols-2 gap-3">
-        {[
-          { key: "candidate" as const, Icon: GraduationCap, label: "I'm a candidate", desc: "Free forever" },
-          { key: "company" as const, Icon: Building2, label: "I'm hiring", desc: "Start a trial" },
-        ].map((r) => (
+      <div className="mb-5 grid grid-cols-3 gap-2">
+        {roles.map((r) => (
           <button
             key={r.key}
             type="button"
@@ -98,8 +109,8 @@ function SignUp() {
             className={`rounded-xl border p-3 text-left transition-all ${role === r.key ? "border-primary bg-primary-soft" : "border-border hover:border-primary/50"}`}
           >
             <r.Icon className={`h-5 w-5 ${role === r.key ? "text-primary" : "text-muted-foreground"}`} />
-            <div className="mt-2 text-sm font-medium">{r.label}</div>
-            <div className="text-xs text-muted-foreground">{r.desc}</div>
+            <div className="mt-2 text-xs font-medium leading-tight">{r.label}</div>
+            <div className="text-[10px] text-muted-foreground">{r.desc}</div>
           </button>
         ))}
       </div>
@@ -108,18 +119,16 @@ function SignUp() {
           <div className="space-y-1.5"><Label>First name</Label><Input name="first_name" placeholder="Ada" required /></div>
           <div className="space-y-1.5"><Label>Last name</Label><Input name="last_name" placeholder="Lovelace" required /></div>
         </div>
-        <div className="space-y-1.5"><Label>Email</Label><Input name="email" type="email" placeholder="you@example.com" required /></div>
-        {role === "company" && (
-          <div className="space-y-1.5"><Label>Company</Label><Input name="company_name" placeholder="Northwind Labs" required /></div>
+        <div className="space-y-1.5"><Label>Email</Label><Input name="email" type="email" defaultValue={search.email} placeholder="you@example.com" required /></div>
+        {orgLabel && (
+          <div className="space-y-1.5"><Label>{orgLabel}</Label><Input name="company_name" placeholder={role === "university" ? "University of Athens" : "Northwind Labs"} required /></div>
         )}
         <div className="space-y-1.5"><Label>Password</Label><Input name="password" type="password" placeholder="At least 8 characters" minLength={8} required /></div>
         <Button type="submit" size="lg" className="w-full" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Create account
         </Button>
-        <p className="text-center text-xs text-muted-foreground">
-          By continuing you agree to our Terms and Privacy Policy.
-        </p>
+        <p className="text-center text-xs text-muted-foreground">By continuing you agree to our Terms and Privacy Policy.</p>
       </form>
     </AuthLayout>
   );
