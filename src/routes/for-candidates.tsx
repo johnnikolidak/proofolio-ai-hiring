@@ -4,18 +4,24 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/use-auth";
+import { dashboardPathFor } from "@/hooks/use-guest";
 
 export const Route = createFileRoute("/for-candidates")({
-  component: CandidateDemo,
+  component: ForCandidates,
   head: () => ({
     meta: [
       { title: "For candidates — Proofolio" },
-      { name: "description", content: "Build a portfolio of real work, get scored by AI, and land the job — for free." },
+      { name: "description", content: "Build a portfolio of real work, get scored by AI, and land the job — free for candidates, forever." },
+      { property: "og:title", content: "For candidates — Proofolio" },
+      { property: "og:description", content: "Skip the resume. Ship real work. Free forever." },
     ],
   }),
 });
 
-function CandidateDemo() {
+function ForCandidates() {
+  const { session, profile, isAdmin } = useAuth();
+  const dash = dashboardPathFor({ isAdmin, role: profile?.role });
   return (
     <div className="min-h-screen">
       <SiteHeader />
@@ -29,15 +35,21 @@ function CandidateDemo() {
           <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
             Real business challenges from real companies. Get AI feedback, earn certificates, and land interviews — even without experience.
           </p>
-          <div className="mt-8 flex gap-3">
-            <Button asChild size="lg"><Link to="/auth/signup">Create free account <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
-            <Button asChild size="lg" variant="outline"><Link to="/candidate">Preview dashboard</Link></Button>
+          <div className="mt-8 flex flex-wrap gap-3">
+            {session ? (
+              <Button asChild size="lg"><Link to={dash}>Open dashboard <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
+            ) : (
+              <>
+                <Button asChild size="lg"><Link to="/auth/signup">Create free account <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
+                <Button asChild size="lg" variant="outline"><Link to="/auth/login">Sign in</Link></Button>
+              </>
+            )}
           </div>
         </div>
       </section>
 
       <section className="container-page py-20">
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {[
             [Sparkles, "AI-scored challenges", "Get feedback on every submission with a transparent, evidence-based rubric."],
             [Brain, "AI interview coach", "Practice with an adaptive interviewer trained on the job you're targeting."],
@@ -59,7 +71,11 @@ function CandidateDemo() {
         <div className="rounded-3xl border border-border bg-primary p-12 text-center text-primary-foreground shadow-glow">
           <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Your portfolio, your proof.</h2>
           <p className="mx-auto mt-3 max-w-xl opacity-90">Free forever. No credit card. Get started in under a minute.</p>
-          <Button asChild size="lg" variant="secondary" className="mt-6"><Link to="/auth/signup">Get started</Link></Button>
+          {session ? (
+            <Button asChild size="lg" variant="secondary" className="mt-6"><Link to={dash}>Open dashboard</Link></Button>
+          ) : (
+            <Button asChild size="lg" variant="secondary" className="mt-6"><Link to="/auth/signup">Get started</Link></Button>
+          )}
         </div>
       </section>
       <SiteFooter />
