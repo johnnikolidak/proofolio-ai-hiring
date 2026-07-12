@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState, type ComponentType, type ReactNode } from "react";
 import { Bell, ChevronDown, LogOut, Menu, Search, ShieldCheck, X } from "lucide-react";
 import { Logo } from "./Logo";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import { Input } from "./ui/input";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { useAuth } from "@/hooks/use-auth";
