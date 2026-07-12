@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { DashboardShell, type NavItem } from "@/components/DashboardShell";
+import { AuthGate } from "@/components/AuthGate";
 import { LayoutDashboard, Megaphone, Users, Wrench, FileBarChart, Video, LineChart, MessageSquare, CreditCard, Settings } from "lucide-react";
 
 const nav: NavItem[] = [
@@ -16,6 +17,10 @@ const nav: NavItem[] = [
 ];
 
 export const Route = createFileRoute("/company")({
-  component: () => <DashboardShell nav={nav} role="Company" userName="Amelia Chen" userEmail="amelia@northwind.io" />,
+  component: () => (
+    <AuthGate requiredRole="company">
+      <DashboardShell nav={nav} role="Company" />
+    </AuthGate>
+  ),
   head: () => ({ meta: [{ title: "Company — Proofolio" }] }),
 });
