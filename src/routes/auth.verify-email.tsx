@@ -21,12 +21,18 @@ function VerifyEmail() {
   const [resending, setResending] = useState(false);
 
   useEffect(() => {
-    // If Supabase auto-signs the user in from the confirm link, this fires.
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session?.user?.email_confirmed_at) {
-        toast.success("Email verified");
-        navigate({ to: "/candidate" });
-      }
+    // Auto-route verified users to the dashboard that matches their role.
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event !== "SIGNED_IN" || !session?.user?.email_confirmed_at) return;
+      const uid = session.user.id;
+      const [{ data: adminRow }, { data: profileRow }] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin").maybeSingle(),
+        supabase.from("profiles").select("role").eq("id", uid).maybeSingle(),
+      ]);
+      toast.success("Email verified");
+      if (adminRow) navigate({ to: "/admin", replace: true });
+      else if (profileRow?.role === "company") navigate({ to: "/company", replace: true });
+      else navigate({ to: "/candidate", replace: true });
     });
     return () => sub.subscription.unsubscribe();
   }, [navigate]);

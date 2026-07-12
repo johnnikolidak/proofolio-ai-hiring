@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { useRedirectIfAuthed } from "@/hooks/use-guest";
 
 export const Route = createFileRoute("/auth/signup")({
   component: SignUp,
@@ -23,6 +24,7 @@ const schema = z.object({
 });
 
 function SignUp() {
+  useRedirectIfAuthed();
   const [role, setRole] = useState<"candidate" | "company">("candidate");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
