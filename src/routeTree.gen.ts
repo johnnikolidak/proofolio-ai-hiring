@@ -9,7 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UniversityRouteImport } from './routes/university'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ForUniversitiesRouteImport } from './routes/for-universities'
 import { Route as ForCompaniesRouteImport } from './routes/for-companies'
 import { Route as ForCandidatesRouteImport } from './routes/for-candidates'
 import { Route as CompanyRouteImport } from './routes/company'
@@ -47,9 +49,19 @@ import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-passw
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
 
+const UniversityRoute = UniversityRouteImport.update({
+  id: '/university',
+  path: '/university',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForUniversitiesRoute = ForUniversitiesRouteImport.update({
+  id: '/for-universities',
+  path: '/for-universities',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForCompaniesRoute = ForCompaniesRouteImport.update({
@@ -241,7 +253,9 @@ export interface FileRoutesByFullPath {
   '/company': typeof CompanyRouteWithChildren
   '/for-candidates': typeof ForCandidatesRoute
   '/for-companies': typeof ForCompaniesRoute
+  '/for-universities': typeof ForUniversitiesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/university': typeof UniversityRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -278,7 +292,9 @@ export interface FileRoutesByTo {
   '/book-demo': typeof BookDemoRoute
   '/for-candidates': typeof ForCandidatesRoute
   '/for-companies': typeof ForCompaniesRoute
+  '/for-universities': typeof ForUniversitiesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/university': typeof UniversityRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -318,7 +334,9 @@ export interface FileRoutesById {
   '/company': typeof CompanyRouteWithChildren
   '/for-candidates': typeof ForCandidatesRoute
   '/for-companies': typeof ForCompaniesRoute
+  '/for-universities': typeof ForUniversitiesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/university': typeof UniversityRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -359,7 +377,9 @@ export interface FileRouteTypes {
     | '/company'
     | '/for-candidates'
     | '/for-companies'
+    | '/for-universities'
     | '/sitemap.xml'
+    | '/university'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -396,7 +416,9 @@ export interface FileRouteTypes {
     | '/book-demo'
     | '/for-candidates'
     | '/for-companies'
+    | '/for-universities'
     | '/sitemap.xml'
+    | '/university'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -435,7 +457,9 @@ export interface FileRouteTypes {
     | '/company'
     | '/for-candidates'
     | '/for-companies'
+    | '/for-universities'
     | '/sitemap.xml'
+    | '/university'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -475,7 +499,9 @@ export interface RootRouteChildren {
   CompanyRoute: typeof CompanyRouteWithChildren
   ForCandidatesRoute: typeof ForCandidatesRoute
   ForCompaniesRoute: typeof ForCompaniesRoute
+  ForUniversitiesRoute: typeof ForUniversitiesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  UniversityRoute: typeof UniversityRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
@@ -485,11 +511,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/university': {
+      id: '/university'
+      path: '/university'
+      fullPath: '/university'
+      preLoaderRoute: typeof UniversityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for-universities': {
+      id: '/for-universities'
+      path: '/for-universities'
+      fullPath: '/for-universities'
+      preLoaderRoute: typeof ForUniversitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/for-companies': {
@@ -822,7 +862,9 @@ const rootRouteChildren: RootRouteChildren = {
   CompanyRoute: CompanyRouteWithChildren,
   ForCandidatesRoute: ForCandidatesRoute,
   ForCompaniesRoute: ForCompaniesRoute,
+  ForUniversitiesRoute: ForUniversitiesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  UniversityRoute: UniversityRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
