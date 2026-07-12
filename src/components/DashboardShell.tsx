@@ -62,10 +62,7 @@ export function DashboardShell({
           </button>
         </div>
         <div className="px-3 py-2">
-          <div className="rounded-lg border border-sidebar-border bg-sidebar-accent/40 px-3 py-2 text-xs">
-            <div className="text-muted-foreground">Workspace</div>
-            <div className="font-medium">{role} account</div>
-          </div>
+          <WorkspaceSwitcher current={role.toLowerCase() as "candidate" | "company" | "university" | "admin"} />
         </div>
         <nav className="flex flex-col gap-0.5 p-2 overflow-y-auto max-h-[calc(100vh-15rem)]">
           {nav.map((item) => (
