@@ -36,10 +36,12 @@ const schema = z.object({
 
 function BookDemo() {
   const [submitted, setSubmitted] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<"sent" | "dev_fallback" | "failed" | null>(null);
   const [loading, setLoading] = useState(false);
   const [teamSize, setTeamSize] = useState<string | undefined>();
   const [hires, setHires] = useState<string | undefined>();
   const navigate = useNavigate();
+  const sendEmails = useServerFn(sendDemoRequestEmails);
   void navigate;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -59,7 +61,7 @@ function BookDemo() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.from("demo_requests").insert({
+    const payload = {
       first_name: parsed.data.first_name,
       last_name: parsed.data.last_name,
       email: parsed.data.email.toLowerCase(),
@@ -67,12 +69,22 @@ function BookDemo() {
       team_size: parsed.data.team_size ?? null,
       hires_per_year: parsed.data.hires_per_year ?? null,
       message: parsed.data.message || null,
-    });
-    setLoading(false);
+    };
+    const { error } = await supabase.from("demo_requests").insert(payload);
     if (error) {
+      setLoading(false);
       toast.error(error.message);
       return;
     }
+    // Fire emails in background — do not block success on delivery
+    try {
+      const res = await sendEmails({ data: payload });
+      const status = res.confirm.status === "sent" ? "sent" : res.confirm.status === "dev_fallback" ? "dev_fallback" : "failed";
+      setEmailStatus(status as "sent" | "dev_fallback" | "failed");
+    } catch {
+      setEmailStatus("failed");
+    }
+    setLoading(false);
     toast.success("Demo request received");
     setSubmitted(true);
   };
