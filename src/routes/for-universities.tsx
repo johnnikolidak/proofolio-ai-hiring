@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { ArrowRight, Award, Handshake, School, Sparkles, Trophy, Users, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -12,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { sendPartnershipRequestEmails } from "@/lib/email.functions";
 
 export const Route = createFileRoute("/for-universities")({
   component: ForUniversities,
