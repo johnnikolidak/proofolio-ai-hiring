@@ -1,9 +1,19 @@
-import { Link, Outlet, useLocation } from "@tanstack/react-router";
+import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState, type ComponentType, type ReactNode } from "react";
-import { Bell, ChevronDown, Menu, Search, X } from "lucide-react";
+import { Bell, ChevronDown, LogOut, Menu, Search, X } from "lucide-react";
 import { Logo } from "./Logo";
 import { Input } from "./ui/input";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { useAuth } from "@/hooks/use-auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { toast } from "sonner";
 
 export type NavItem = {
   to: string;
@@ -15,20 +25,31 @@ export type NavItem = {
 export function DashboardShell({
   nav,
   role,
-  userName,
-  userEmail,
 }: {
   nav: NavItem[];
-  role: "Candidate" | "Company";
-  userName: string;
-  userEmail: string;
+  role: "Candidate" | "Company" | "Admin";
 }) {
   const [open, setOpen] = useState(false);
-  const initials = userName.split(" ").map((n) => n[0]).slice(0, 2).join("");
+  const { profile, user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const displayName = profile?.full_name || profile?.email || user?.email || "Account";
+  const displayEmail = profile?.email || user?.email || "";
+  const initials = (displayName || "?")
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Signed out");
+    navigate({ to: "/" });
+  };
 
   return (
     <div className="min-h-screen bg-secondary/30">
-      {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-border bg-sidebar text-sidebar-foreground transition-transform lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
@@ -52,18 +73,29 @@ export function DashboardShell({
           ))}
         </nav>
         <div className="absolute inset-x-0 bottom-0 border-t border-sidebar-border p-3">
-          <div className="flex items-center gap-3 rounded-lg px-2 py-2">
-            <Avatar className="h-9 w-9">
-              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-medium">{userName}</div>
-              <div className="truncate text-xs text-muted-foreground">{userEmail}</div>
-            </div>
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors hover:bg-sidebar-accent">
+                <Avatar className="h-9 w-9">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-medium">{displayName}</div>
+                  <div className="truncate text-xs text-muted-foreground">{displayEmail}</div>
+                </div>
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Signed in as {displayEmail}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
+                <LogOut className="mr-2 h-4 w-4" /> Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </aside>
 
@@ -103,7 +135,9 @@ export function DashboardShell({
 
 function SideLink({ item, onNavigate }: { item: NavItem; onNavigate: () => void }) {
   const location = useLocation();
-  const active = location.pathname === item.to || (item.to !== "/candidate" && item.to !== "/company" && location.pathname.startsWith(item.to));
+  const active =
+    location.pathname === item.to ||
+    (item.to !== "/candidate" && item.to !== "/company" && item.to !== "/admin" && location.pathname.startsWith(item.to));
   const Icon = item.icon;
   return (
     <Link

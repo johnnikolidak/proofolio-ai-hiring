@@ -15,6 +15,7 @@ import { Route as CompanyRouteImport } from './routes/company'
 import { Route as CandidateDemoRouteImport } from './routes/candidate-demo'
 import { Route as CandidateRouteImport } from './routes/candidate'
 import { Route as BookDemoRouteImport } from './routes/book-demo'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CompanyIndexRouteImport } from './routes/company.index'
 import { Route as CandidateIndexRouteImport } from './routes/candidate.index'
@@ -37,6 +38,7 @@ import { Route as CandidateCertificatesRouteImport } from './routes/candidate.ce
 import { Route as CandidateApplicationsRouteImport } from './routes/candidate.applications'
 import { Route as AuthVerifyEmailRouteImport } from './routes/auth.verify-email'
 import { Route as AuthSignupRouteImport } from './routes/auth.signup'
+import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
 
@@ -68,6 +70,11 @@ const CandidateRoute = CandidateRouteImport.update({
 const BookDemoRoute = BookDemoRouteImport.update({
   id: '/book-demo',
   path: '/book-demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -180,6 +187,11 @@ const AuthSignupRoute = AuthSignupRouteImport.update({
   path: '/auth/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
+  id: '/auth/reset-password',
+  path: '/auth/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/auth/login',
   path: '/auth/login',
@@ -193,6 +205,7 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/book-demo': typeof BookDemoRoute
   '/candidate': typeof CandidateRouteWithChildren
   '/candidate-demo': typeof CandidateDemoRoute
@@ -201,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/candidate/applications': typeof CandidateApplicationsRoute
@@ -225,12 +239,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/book-demo': typeof BookDemoRoute
   '/candidate-demo': typeof CandidateDemoRoute
   '/company-demo': typeof CompanyDemoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/candidate/applications': typeof CandidateApplicationsRoute
@@ -256,6 +272,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/book-demo': typeof BookDemoRoute
   '/candidate': typeof CandidateRouteWithChildren
   '/candidate-demo': typeof CandidateDemoRoute
@@ -264,6 +281,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/candidate/applications': typeof CandidateApplicationsRoute
@@ -290,6 +308,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/book-demo'
     | '/candidate'
     | '/candidate-demo'
@@ -298,6 +317,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/auth/forgot-password'
     | '/auth/login'
+    | '/auth/reset-password'
     | '/auth/signup'
     | '/auth/verify-email'
     | '/candidate/applications'
@@ -322,12 +342,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/book-demo'
     | '/candidate-demo'
     | '/company-demo'
     | '/sitemap.xml'
     | '/auth/forgot-password'
     | '/auth/login'
+    | '/auth/reset-password'
     | '/auth/signup'
     | '/auth/verify-email'
     | '/candidate/applications'
@@ -352,6 +374,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/book-demo'
     | '/candidate'
     | '/candidate-demo'
@@ -360,6 +383,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/auth/forgot-password'
     | '/auth/login'
+    | '/auth/reset-password'
     | '/auth/signup'
     | '/auth/verify-email'
     | '/candidate/applications'
@@ -385,6 +409,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   BookDemoRoute: typeof BookDemoRoute
   CandidateRoute: typeof CandidateRouteWithChildren
   CandidateDemoRoute: typeof CandidateDemoRoute
@@ -393,6 +418,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
+  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthSignupRoute: typeof AuthSignupRoute
   AuthVerifyEmailRoute: typeof AuthVerifyEmailRoute
 }
@@ -439,6 +465,13 @@ declare module '@tanstack/react-router' {
       path: '/book-demo'
       fullPath: '/book-demo'
       preLoaderRoute: typeof BookDemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -595,6 +628,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/reset-password': {
+      id: '/auth/reset-password'
+      path: '/auth/reset-password'
+      fullPath: '/auth/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/login': {
       id: '/auth/login'
       path: '/auth/login'
@@ -671,6 +711,7 @@ const CompanyRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   BookDemoRoute: BookDemoRoute,
   CandidateRoute: CandidateRouteWithChildren,
   CandidateDemoRoute: CandidateDemoRoute,
@@ -679,19 +720,10 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthSignupRoute: AuthSignupRoute,
   AuthVerifyEmailRoute: AuthVerifyEmailRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

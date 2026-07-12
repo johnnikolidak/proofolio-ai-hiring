@@ -1,38 +1,69 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { z } from "zod";
+import { toast } from "sonner";
 import { AuthLayout } from "@/components/AuthLayout";
 import { Button } from "@/components/ui/button";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Mail } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+const searchSchema = z.object({ email: z.string().email().optional() });
 
 export const Route = createFileRoute("/auth/verify-email")({
+  validateSearch: (s) => searchSchema.parse(s),
   component: VerifyEmail,
   head: () => ({ meta: [{ title: "Verify email — Proofolio" }] }),
 });
 
 function VerifyEmail() {
-  const [code, setCode] = useState("");
+  const { email } = Route.useSearch();
+  const navigate = useNavigate();
+  const [resending, setResending] = useState(false);
+
+  useEffect(() => {
+    // If Supabase auto-signs the user in from the confirm link, this fires.
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user?.email_confirmed_at) {
+        toast.success("Email verified");
+        navigate({ to: "/candidate" });
+      }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [navigate]);
+
+  const resend = async () => {
+    if (!email) {
+      toast.error("Enter your email on the sign-up page to resend");
+      return;
+    }
+    setResending(true);
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/auth/verify-email` },
+    });
+    setResending(false);
+    if (error) toast.error(error.message);
+    else toast.success("Verification email sent again.");
+  };
+
   return (
     <AuthLayout
       title="Verify your email"
-      subtitle="Enter the 6-digit code we sent to ada@example.com"
+      subtitle={email ? `We sent a verification link to ${email}. Click it to activate your account.` : "We sent you a verification link. Click it to activate your account."}
       footer={<>Wrong email? <Link to="/auth/signup" className="text-primary hover:underline">Start over</Link></>}
     >
       <div className="mx-auto mb-6 grid h-14 w-14 place-items-center rounded-2xl bg-primary-soft text-primary">
         <Mail className="h-6 w-6" />
       </div>
-      <div className="flex justify-center">
-        <InputOTP maxLength={6} value={code} onChange={setCode}>
-          <InputOTPGroup>
-            {Array.from({ length: 6 }).map((_, i) => <InputOTPSlot key={i} index={i} />)}
-          </InputOTPGroup>
-        </InputOTP>
+      <div className="rounded-lg border border-border bg-secondary p-4 text-center text-sm text-muted-foreground">
+        Waiting for you to click the link in your inbox. This page will update automatically once you're verified.
       </div>
-      <Button asChild size="lg" className="mt-6 w-full">
-        <Link to="/candidate">Verify & continue</Link>
+      <Button variant="outline" className="mt-6 w-full" onClick={resend} disabled={resending}>
+        {resending ? "Sending…" : "Resend verification email"}
       </Button>
       <p className="mt-4 text-center text-xs text-muted-foreground">
-        Didn't receive it? <button className="text-primary hover:underline">Resend code</button>
+        Already verified? <Link to="/auth/login" className="text-primary hover:underline">Sign in</Link>
       </p>
     </AuthLayout>
   );
