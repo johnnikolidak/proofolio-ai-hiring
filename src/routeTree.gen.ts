@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as CompanyDemoRouteImport } from './routes/company-demo'
+import { Route as CompanyRouteImport } from './routes/company'
 import { Route as CandidateDemoRouteImport } from './routes/candidate-demo'
+import { Route as CandidateRouteImport } from './routes/candidate'
 import { Route as BookDemoRouteImport } from './routes/book-demo'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthVerifyEmailRouteImport } from './routes/auth.verify-email'
@@ -23,9 +25,19 @@ const CompanyDemoRoute = CompanyDemoRouteImport.update({
   path: '/company-demo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompanyRoute = CompanyRouteImport.update({
+  id: '/company',
+  path: '/company',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CandidateDemoRoute = CandidateDemoRouteImport.update({
   id: '/candidate-demo',
   path: '/candidate-demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CandidateRoute = CandidateRouteImport.update({
+  id: '/candidate',
+  path: '/candidate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookDemoRoute = BookDemoRouteImport.update({
@@ -62,7 +74,9 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/book-demo': typeof BookDemoRoute
+  '/candidate': typeof CandidateRoute
   '/candidate-demo': typeof CandidateDemoRoute
+  '/company': typeof CompanyRoute
   '/company-demo': typeof CompanyDemoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -72,7 +86,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/book-demo': typeof BookDemoRoute
+  '/candidate': typeof CandidateRoute
   '/candidate-demo': typeof CandidateDemoRoute
+  '/company': typeof CompanyRoute
   '/company-demo': typeof CompanyDemoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -83,7 +99,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/book-demo': typeof BookDemoRoute
+  '/candidate': typeof CandidateRoute
   '/candidate-demo': typeof CandidateDemoRoute
+  '/company': typeof CompanyRoute
   '/company-demo': typeof CompanyDemoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -95,7 +113,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/book-demo'
+    | '/candidate'
     | '/candidate-demo'
+    | '/company'
     | '/company-demo'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -105,7 +125,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/book-demo'
+    | '/candidate'
     | '/candidate-demo'
+    | '/company'
     | '/company-demo'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -115,7 +137,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/book-demo'
+    | '/candidate'
     | '/candidate-demo'
+    | '/company'
     | '/company-demo'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -126,7 +150,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BookDemoRoute: typeof BookDemoRoute
+  CandidateRoute: typeof CandidateRoute
   CandidateDemoRoute: typeof CandidateDemoRoute
+  CompanyRoute: typeof CompanyRoute
   CompanyDemoRoute: typeof CompanyDemoRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
@@ -143,11 +169,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompanyDemoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/company': {
+      id: '/company'
+      path: '/company'
+      fullPath: '/company'
+      preLoaderRoute: typeof CompanyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/candidate-demo': {
       id: '/candidate-demo'
       path: '/candidate-demo'
       fullPath: '/candidate-demo'
       preLoaderRoute: typeof CandidateDemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/candidate': {
+      id: '/candidate'
+      path: '/candidate'
+      fullPath: '/candidate'
+      preLoaderRoute: typeof CandidateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/book-demo': {
@@ -198,7 +238,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BookDemoRoute: BookDemoRoute,
+  CandidateRoute: CandidateRoute,
   CandidateDemoRoute: CandidateDemoRoute,
+  CompanyRoute: CompanyRoute,
   CompanyDemoRoute: CompanyDemoRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
