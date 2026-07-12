@@ -15,7 +15,17 @@ import { Route as CandidateDemoRouteImport } from './routes/candidate-demo'
 import { Route as CandidateRouteImport } from './routes/candidate'
 import { Route as BookDemoRouteImport } from './routes/book-demo'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CompanyIndexRouteImport } from './routes/company.index'
 import { Route as CandidateIndexRouteImport } from './routes/candidate.index'
+import { Route as CompanySettingsRouteImport } from './routes/company.settings'
+import { Route as CompanyReportsRouteImport } from './routes/company.reports'
+import { Route as CompanyMessagesRouteImport } from './routes/company.messages'
+import { Route as CompanyInterviewsRouteImport } from './routes/company.interviews'
+import { Route as CompanyChallengeBuilderRouteImport } from './routes/company.challenge-builder'
+import { Route as CompanyCandidatesRouteImport } from './routes/company.candidates'
+import { Route as CompanyCampaignsRouteImport } from './routes/company.campaigns'
+import { Route as CompanyBillingRouteImport } from './routes/company.billing'
+import { Route as CompanyAnalyticsRouteImport } from './routes/company.analytics'
 import { Route as CandidateSettingsRouteImport } from './routes/candidate.settings'
 import { Route as CandidateRoadmapRouteImport } from './routes/candidate.roadmap'
 import { Route as CandidateProfileRouteImport } from './routes/candidate.profile'
@@ -59,10 +69,60 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompanyIndexRoute = CompanyIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CompanyRoute,
+} as any)
 const CandidateIndexRoute = CandidateIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CandidateRoute,
+} as any)
+const CompanySettingsRoute = CompanySettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => CompanyRoute,
+} as any)
+const CompanyReportsRoute = CompanyReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => CompanyRoute,
+} as any)
+const CompanyMessagesRoute = CompanyMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => CompanyRoute,
+} as any)
+const CompanyInterviewsRoute = CompanyInterviewsRouteImport.update({
+  id: '/interviews',
+  path: '/interviews',
+  getParentRoute: () => CompanyRoute,
+} as any)
+const CompanyChallengeBuilderRoute = CompanyChallengeBuilderRouteImport.update({
+  id: '/challenge-builder',
+  path: '/challenge-builder',
+  getParentRoute: () => CompanyRoute,
+} as any)
+const CompanyCandidatesRoute = CompanyCandidatesRouteImport.update({
+  id: '/candidates',
+  path: '/candidates',
+  getParentRoute: () => CompanyRoute,
+} as any)
+const CompanyCampaignsRoute = CompanyCampaignsRouteImport.update({
+  id: '/campaigns',
+  path: '/campaigns',
+  getParentRoute: () => CompanyRoute,
+} as any)
+const CompanyBillingRoute = CompanyBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => CompanyRoute,
+} as any)
+const CompanyAnalyticsRoute = CompanyAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => CompanyRoute,
 } as any)
 const CandidateSettingsRoute = CandidateSettingsRouteImport.update({
   id: '/settings',
@@ -130,7 +190,7 @@ export interface FileRoutesByFullPath {
   '/book-demo': typeof BookDemoRoute
   '/candidate': typeof CandidateRouteWithChildren
   '/candidate-demo': typeof CandidateDemoRoute
-  '/company': typeof CompanyRoute
+  '/company': typeof CompanyRouteWithChildren
   '/company-demo': typeof CompanyDemoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -144,13 +204,22 @@ export interface FileRoutesByFullPath {
   '/candidate/profile': typeof CandidateProfileRoute
   '/candidate/roadmap': typeof CandidateRoadmapRoute
   '/candidate/settings': typeof CandidateSettingsRoute
+  '/company/analytics': typeof CompanyAnalyticsRoute
+  '/company/billing': typeof CompanyBillingRoute
+  '/company/campaigns': typeof CompanyCampaignsRoute
+  '/company/candidates': typeof CompanyCandidatesRoute
+  '/company/challenge-builder': typeof CompanyChallengeBuilderRoute
+  '/company/interviews': typeof CompanyInterviewsRoute
+  '/company/messages': typeof CompanyMessagesRoute
+  '/company/reports': typeof CompanyReportsRoute
+  '/company/settings': typeof CompanySettingsRoute
   '/candidate/': typeof CandidateIndexRoute
+  '/company/': typeof CompanyIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/book-demo': typeof BookDemoRoute
   '/candidate-demo': typeof CandidateDemoRoute
-  '/company': typeof CompanyRoute
   '/company-demo': typeof CompanyDemoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -164,7 +233,17 @@ export interface FileRoutesByTo {
   '/candidate/profile': typeof CandidateProfileRoute
   '/candidate/roadmap': typeof CandidateRoadmapRoute
   '/candidate/settings': typeof CandidateSettingsRoute
+  '/company/analytics': typeof CompanyAnalyticsRoute
+  '/company/billing': typeof CompanyBillingRoute
+  '/company/campaigns': typeof CompanyCampaignsRoute
+  '/company/candidates': typeof CompanyCandidatesRoute
+  '/company/challenge-builder': typeof CompanyChallengeBuilderRoute
+  '/company/interviews': typeof CompanyInterviewsRoute
+  '/company/messages': typeof CompanyMessagesRoute
+  '/company/reports': typeof CompanyReportsRoute
+  '/company/settings': typeof CompanySettingsRoute
   '/candidate': typeof CandidateIndexRoute
+  '/company': typeof CompanyIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -172,7 +251,7 @@ export interface FileRoutesById {
   '/book-demo': typeof BookDemoRoute
   '/candidate': typeof CandidateRouteWithChildren
   '/candidate-demo': typeof CandidateDemoRoute
-  '/company': typeof CompanyRoute
+  '/company': typeof CompanyRouteWithChildren
   '/company-demo': typeof CompanyDemoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -186,7 +265,17 @@ export interface FileRoutesById {
   '/candidate/profile': typeof CandidateProfileRoute
   '/candidate/roadmap': typeof CandidateRoadmapRoute
   '/candidate/settings': typeof CandidateSettingsRoute
+  '/company/analytics': typeof CompanyAnalyticsRoute
+  '/company/billing': typeof CompanyBillingRoute
+  '/company/campaigns': typeof CompanyCampaignsRoute
+  '/company/candidates': typeof CompanyCandidatesRoute
+  '/company/challenge-builder': typeof CompanyChallengeBuilderRoute
+  '/company/interviews': typeof CompanyInterviewsRoute
+  '/company/messages': typeof CompanyMessagesRoute
+  '/company/reports': typeof CompanyReportsRoute
+  '/company/settings': typeof CompanySettingsRoute
   '/candidate/': typeof CandidateIndexRoute
+  '/company/': typeof CompanyIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -209,13 +298,22 @@ export interface FileRouteTypes {
     | '/candidate/profile'
     | '/candidate/roadmap'
     | '/candidate/settings'
+    | '/company/analytics'
+    | '/company/billing'
+    | '/company/campaigns'
+    | '/company/candidates'
+    | '/company/challenge-builder'
+    | '/company/interviews'
+    | '/company/messages'
+    | '/company/reports'
+    | '/company/settings'
     | '/candidate/'
+    | '/company/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/book-demo'
     | '/candidate-demo'
-    | '/company'
     | '/company-demo'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -229,7 +327,17 @@ export interface FileRouteTypes {
     | '/candidate/profile'
     | '/candidate/roadmap'
     | '/candidate/settings'
+    | '/company/analytics'
+    | '/company/billing'
+    | '/company/campaigns'
+    | '/company/candidates'
+    | '/company/challenge-builder'
+    | '/company/interviews'
+    | '/company/messages'
+    | '/company/reports'
+    | '/company/settings'
     | '/candidate'
+    | '/company'
   id:
     | '__root__'
     | '/'
@@ -250,7 +358,17 @@ export interface FileRouteTypes {
     | '/candidate/profile'
     | '/candidate/roadmap'
     | '/candidate/settings'
+    | '/company/analytics'
+    | '/company/billing'
+    | '/company/campaigns'
+    | '/company/candidates'
+    | '/company/challenge-builder'
+    | '/company/interviews'
+    | '/company/messages'
+    | '/company/reports'
+    | '/company/settings'
     | '/candidate/'
+    | '/company/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -258,7 +376,7 @@ export interface RootRouteChildren {
   BookDemoRoute: typeof BookDemoRoute
   CandidateRoute: typeof CandidateRouteWithChildren
   CandidateDemoRoute: typeof CandidateDemoRoute
-  CompanyRoute: typeof CompanyRoute
+  CompanyRoute: typeof CompanyRouteWithChildren
   CompanyDemoRoute: typeof CompanyDemoRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
@@ -310,12 +428,82 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/company/': {
+      id: '/company/'
+      path: '/'
+      fullPath: '/company/'
+      preLoaderRoute: typeof CompanyIndexRouteImport
+      parentRoute: typeof CompanyRoute
+    }
     '/candidate/': {
       id: '/candidate/'
       path: '/'
       fullPath: '/candidate/'
       preLoaderRoute: typeof CandidateIndexRouteImport
       parentRoute: typeof CandidateRoute
+    }
+    '/company/settings': {
+      id: '/company/settings'
+      path: '/settings'
+      fullPath: '/company/settings'
+      preLoaderRoute: typeof CompanySettingsRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/reports': {
+      id: '/company/reports'
+      path: '/reports'
+      fullPath: '/company/reports'
+      preLoaderRoute: typeof CompanyReportsRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/messages': {
+      id: '/company/messages'
+      path: '/messages'
+      fullPath: '/company/messages'
+      preLoaderRoute: typeof CompanyMessagesRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/interviews': {
+      id: '/company/interviews'
+      path: '/interviews'
+      fullPath: '/company/interviews'
+      preLoaderRoute: typeof CompanyInterviewsRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/challenge-builder': {
+      id: '/company/challenge-builder'
+      path: '/challenge-builder'
+      fullPath: '/company/challenge-builder'
+      preLoaderRoute: typeof CompanyChallengeBuilderRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/candidates': {
+      id: '/company/candidates'
+      path: '/candidates'
+      fullPath: '/company/candidates'
+      preLoaderRoute: typeof CompanyCandidatesRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/campaigns': {
+      id: '/company/campaigns'
+      path: '/campaigns'
+      fullPath: '/company/campaigns'
+      preLoaderRoute: typeof CompanyCampaignsRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/billing': {
+      id: '/company/billing'
+      path: '/billing'
+      fullPath: '/company/billing'
+      preLoaderRoute: typeof CompanyBillingRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/analytics': {
+      id: '/company/analytics'
+      path: '/analytics'
+      fullPath: '/company/analytics'
+      preLoaderRoute: typeof CompanyAnalyticsRouteImport
+      parentRoute: typeof CompanyRoute
     }
     '/candidate/settings': {
       id: '/candidate/settings'
@@ -432,12 +620,41 @@ const CandidateRouteWithChildren = CandidateRoute._addFileChildren(
   CandidateRouteChildren,
 )
 
+interface CompanyRouteChildren {
+  CompanyAnalyticsRoute: typeof CompanyAnalyticsRoute
+  CompanyBillingRoute: typeof CompanyBillingRoute
+  CompanyCampaignsRoute: typeof CompanyCampaignsRoute
+  CompanyCandidatesRoute: typeof CompanyCandidatesRoute
+  CompanyChallengeBuilderRoute: typeof CompanyChallengeBuilderRoute
+  CompanyInterviewsRoute: typeof CompanyInterviewsRoute
+  CompanyMessagesRoute: typeof CompanyMessagesRoute
+  CompanyReportsRoute: typeof CompanyReportsRoute
+  CompanySettingsRoute: typeof CompanySettingsRoute
+  CompanyIndexRoute: typeof CompanyIndexRoute
+}
+
+const CompanyRouteChildren: CompanyRouteChildren = {
+  CompanyAnalyticsRoute: CompanyAnalyticsRoute,
+  CompanyBillingRoute: CompanyBillingRoute,
+  CompanyCampaignsRoute: CompanyCampaignsRoute,
+  CompanyCandidatesRoute: CompanyCandidatesRoute,
+  CompanyChallengeBuilderRoute: CompanyChallengeBuilderRoute,
+  CompanyInterviewsRoute: CompanyInterviewsRoute,
+  CompanyMessagesRoute: CompanyMessagesRoute,
+  CompanyReportsRoute: CompanyReportsRoute,
+  CompanySettingsRoute: CompanySettingsRoute,
+  CompanyIndexRoute: CompanyIndexRoute,
+}
+
+const CompanyRouteWithChildren =
+  CompanyRoute._addFileChildren(CompanyRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BookDemoRoute: BookDemoRoute,
   CandidateRoute: CandidateRouteWithChildren,
   CandidateDemoRoute: CandidateDemoRoute,
-  CompanyRoute: CompanyRoute,
+  CompanyRoute: CompanyRouteWithChildren,
   CompanyDemoRoute: CompanyDemoRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
