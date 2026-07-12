@@ -7,9 +7,11 @@ import {
   ArrowLeft,
   Building2,
   GraduationCap,
+  Handshake,
   Loader2,
   LogOut,
   Mail,
+  School,
   ShieldCheck,
   Users2,
 } from "lucide-react";
