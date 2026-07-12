@@ -121,6 +121,15 @@ function BookDemo() {
               </div>
               <h2 className="mt-4 text-xl font-semibold">You're on the list</h2>
               <p className="mt-2 text-sm text-muted-foreground">We'll reach out within 24 hours to confirm your demo time.</p>
+              {emailStatus === "sent" && (
+                <p className="mt-3 text-xs text-success">Confirmation email sent — check your inbox.</p>
+              )}
+              {emailStatus === "dev_fallback" && (
+                <p className="mt-3 text-xs text-muted-foreground">Your request is saved. Email delivery is pending sender-domain verification; our team has been notified.</p>
+              )}
+              {emailStatus === "failed" && (
+                <p className="mt-3 text-xs text-warning-foreground">Your request is saved, but our email provider did not accept the message. Our team was still notified in the admin console.</p>
+              )}
               <Button asChild variant="outline" className="mt-6"><Link to="/">Back to home</Link></Button>
             </div>
           ) : (
