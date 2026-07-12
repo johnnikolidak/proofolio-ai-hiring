@@ -79,8 +79,8 @@ function ForUniversities() {
             Run campus challenges with employer partners. Give every student a Proof Profile. Track evidence dimensions across cohorts. Issue verified certificates that follow them into the workforce.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            {session && profile?.role === "university" ? (
-              <Button asChild size="lg"><Link to={dash}>Open dashboard <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
+            {session && isUniversity ? (
+              <Button asChild size="lg"><Link to="/university">Open university workspace <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
             ) : (
               <>
                 <Button asChild size="lg"><a href="#partner">Request partnership <ArrowRight className="ml-1 h-4 w-4" /></a></Button>
