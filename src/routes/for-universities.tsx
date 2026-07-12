@@ -38,7 +38,7 @@ const schema = z.object({
 
 function ForUniversities() {
   const { session, profile, isAdmin } = useAuth();
-  const dash = dashboardPathFor({ isAdmin, role: profile?.role });
+  const isUniversity = isAdmin || profile?.role === "university";
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
