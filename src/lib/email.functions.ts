@@ -74,7 +74,7 @@ async function logEmail(
 ) {
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.from("email_log").insert({ to_addr: to, subject, template, payload, status, error: error ?? null });
+    await supabaseAdmin.from("email_log").insert({ to_addr: to, subject, template, payload: payload as never, status, error: error ?? null });
   } catch (e) {
     console.error("[email] failed to write email_log", e);
   }
