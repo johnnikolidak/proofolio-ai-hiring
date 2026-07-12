@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useRedirectIfAuthed } from "@/hooks/use-guest";
 
 export const Route = createFileRoute("/auth/forgot-password")({
   component: ForgotPassword,
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/auth/forgot-password")({
 const schema = z.object({ email: z.string().trim().email("Enter a valid email") });
 
 function ForgotPassword() {
+  useRedirectIfAuthed();
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
 

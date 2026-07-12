@@ -4,18 +4,24 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/use-auth";
+import { dashboardPathFor } from "@/hooks/use-guest";
 
-export const Route = createFileRoute("/company-demo")({
-  component: CompanyDemo,
+export const Route = createFileRoute("/for-companies")({
+  component: ForCompanies,
   head: () => ({
     meta: [
       { title: "For companies — Proofolio" },
-      { name: "description", content: "Hire on proof of skill. Real challenges, AI reports, and a modern hiring workflow." },
+      { name: "description", content: "Hire on proof of skill. Real challenges, AI-scored candidate reports, and a modern hiring workflow." },
+      { property: "og:title", content: "For companies — Proofolio" },
+      { property: "og:description", content: "Skills-first hiring workflow: challenges, AI reports, structured interviews." },
     ],
   }),
 });
 
-function CompanyDemo() {
+function ForCompanies() {
+  const { session, profile, isAdmin } = useAuth();
+  const dash = dashboardPathFor({ isAdmin, role: profile?.role });
   return (
     <div className="min-h-screen">
       <SiteHeader />
@@ -29,15 +35,21 @@ function CompanyDemo() {
           <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
             Launch skill challenges, get AI-scored candidate reports, and run structured interviews — all in one place.
           </p>
-          <div className="mt-8 flex gap-3">
-            <Button asChild size="lg"><Link to="/book-demo">Book a demo <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
-            <Button asChild size="lg" variant="outline"><Link to="/company">Preview dashboard</Link></Button>
+          <div className="mt-8 flex flex-wrap gap-3">
+            {session ? (
+              <Button asChild size="lg"><Link to={dash}>Open dashboard <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
+            ) : (
+              <>
+                <Button asChild size="lg"><Link to="/book-demo">Book a demo <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
+                <Button asChild size="lg" variant="outline"><Link to="/auth/signup">Start free trial</Link></Button>
+              </>
+            )}
           </div>
         </div>
       </section>
 
       <section className="container-page py-20">
-        <div className="grid gap-6 md:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {[
             [Target, "Challenge Builder", "Ship a scoped, on-brand challenge in minutes with AI-assisted templates."],
             [Rocket, "AI candidate reports", "Evidence-linked scores your hiring managers can trust and audit."],

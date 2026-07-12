@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Brain, CheckCircle2, ChevronRight, LineChart, Rocket, ShieldCheck, Sparkles, Target, Trophy, Users, Zap } from "lucide-react";
+import { ArrowRight, Brain, CheckCircle2, ChevronRight, LayoutDashboard, LineChart, Rocket, ShieldCheck, Sparkles, Target, Trophy, Users, Zap } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { WaitlistForm } from "@/components/WaitlistForm";
+import { useAuth } from "@/hooks/use-auth";
+import { dashboardPathFor } from "@/hooks/use-guest";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -50,6 +52,8 @@ const faqs = [
 ];
 
 function Landing() {
+  const { session, profile, isAdmin } = useAuth();
+  const dash = dashboardPathFor({ isAdmin, role: profile?.role });
   return (
     <div className="min-h-screen">
       <SiteHeader />
@@ -70,12 +74,20 @@ function Landing() {
               Proofolio connects companies with students and early-career talent through real business challenges — scored by AI, judged by humans.
             </p>
             <div className="animate-fade-in-up delay-300 mt-8 flex flex-wrap justify-center gap-3">
-              <Button asChild size="lg" className="h-12 gap-1.5 px-6 shadow-elev">
-                <Link to="/auth/signup">Start free <ArrowRight className="h-4 w-4" /></Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="h-12 px-6">
-                <Link to="/book-demo">Book a demo</Link>
-              </Button>
+              {session ? (
+                <Button asChild size="lg" className="h-12 gap-1.5 px-6 shadow-elev">
+                  <Link to={dash}><LayoutDashboard className="h-4 w-4" /> Open dashboard <ArrowRight className="h-4 w-4" /></Link>
+                </Button>
+              ) : (
+                <>
+                  <Button asChild size="lg" className="h-12 gap-1.5 px-6 shadow-elev">
+                    <Link to="/auth/signup">Start free <ArrowRight className="h-4 w-4" /></Link>
+                  </Button>
+                  <Button asChild size="lg" variant="outline" className="h-12 px-6">
+                    <Link to="/book-demo">Book a demo</Link>
+                  </Button>
+                </>
+              )}
             </div>
             <div className="mt-6 flex flex-wrap justify-center gap-6 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-primary" /> Free for candidates</span>
@@ -185,8 +197,8 @@ function Landing() {
             ))}
           </div>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
-            <Button asChild variant="outline"><Link to="/candidate-demo">See candidate demo <ChevronRight className="h-4 w-4" /></Link></Button>
-            <Button asChild><Link to="/company-demo">See company demo <ChevronRight className="h-4 w-4" /></Link></Button>
+            <Button asChild variant="outline"><Link to="/for-candidates">For candidates <ChevronRight className="h-4 w-4" /></Link></Button>
+            <Button asChild><Link to="/for-companies">For companies <ChevronRight className="h-4 w-4" /></Link></Button>
           </div>
         </div>
       </section>
