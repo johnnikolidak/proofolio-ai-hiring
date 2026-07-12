@@ -1,6 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { CheckCircle2, Calendar, Users, Building2 } from "lucide-react";
+import { z } from "zod";
+import { toast } from "sonner";
+import { CheckCircle2, Calendar, Users, Building2, Loader2 } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
@@ -8,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/book-demo")({
   component: BookDemo,
@@ -19,8 +22,59 @@ export const Route = createFileRoute("/book-demo")({
   }),
 });
 
+const schema = z.object({
+  first_name: z.string().trim().min(1).max(100),
+  last_name: z.string().trim().min(1).max(100),
+  email: z.string().trim().email("Enter a valid work email").max(255),
+  company: z.string().trim().min(1).max(200),
+  team_size: z.string().optional(),
+  hires_per_year: z.string().optional(),
+  message: z.string().max(2000).optional(),
+});
+
 function BookDemo() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [teamSize, setTeamSize] = useState<string | undefined>();
+  const [hires, setHires] = useState<string | undefined>();
+  const navigate = useNavigate();
+  void navigate;
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const parsed = schema.safeParse({
+      first_name: fd.get("first_name"),
+      last_name: fd.get("last_name"),
+      email: fd.get("email"),
+      company: fd.get("company"),
+      team_size: teamSize,
+      hires_per_year: hires,
+      message: fd.get("message") ?? "",
+    });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]!.message);
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.from("demo_requests").insert({
+      first_name: parsed.data.first_name,
+      last_name: parsed.data.last_name,
+      email: parsed.data.email.toLowerCase(),
+      company: parsed.data.company,
+      team_size: parsed.data.team_size ?? null,
+      hires_per_year: parsed.data.hires_per_year ?? null,
+      message: parsed.data.message || null,
+    });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Demo request received");
+    setSubmitted(true);
+  };
+
   return (
     <div className="min-h-screen">
       <SiteHeader />
@@ -56,38 +110,39 @@ function BookDemo() {
               <Button asChild variant="outline" className="mt-6"><Link to="/">Back to home</Link></Button>
             </div>
           ) : (
-            <form
-              className="space-y-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSubmitted(true);
-              }}
-            >
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <h2 className="text-lg font-semibold">Tell us about your team</h2>
               <div className="grid gap-4 md:grid-cols-2">
-                <Field label="First name"><Input required placeholder="Ada" /></Field>
-                <Field label="Last name"><Input required placeholder="Lovelace" /></Field>
+                <Field label="First name"><Input name="first_name" required placeholder="Ada" /></Field>
+                <Field label="Last name"><Input name="last_name" required placeholder="Lovelace" /></Field>
               </div>
-              <Field label="Work email"><Input required type="email" placeholder="ada@company.com" /></Field>
-              <Field label="Company"><Input required placeholder="Northwind Labs" /></Field>
+              <Field label="Work email"><Input name="email" required type="email" placeholder="ada@company.com" /></Field>
+              <Field label="Company"><Input name="company" required placeholder="Northwind Labs" /></Field>
               <div className="grid gap-4 md:grid-cols-2">
                 <Field label="Team size">
-                  <Select><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                  <Select value={teamSize} onValueChange={setTeamSize}>
+                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                     <SelectContent>
                       {["1–10", "11–50", "51–200", "201–1000", "1000+"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </Field>
                 <Field label="Hires per year">
-                  <Select><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                  <Select value={hires} onValueChange={setHires}>
+                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                     <SelectContent>
                       {["1–10", "10–50", "50–200", "200+"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </Field>
               </div>
-              <Field label="What are you hoping to solve?"><Textarea rows={4} placeholder="E.g. reduce time-to-hire for our grad program" /></Field>
-              <Button type="submit" size="lg" className="w-full">Request demo</Button>
+              <Field label="What are you hoping to solve?">
+                <Textarea name="message" rows={4} placeholder="E.g. reduce time-to-hire for our grad program" />
+              </Field>
+              <Button type="submit" size="lg" className="w-full" disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Request demo
+              </Button>
               <p className="text-center text-xs text-muted-foreground">By submitting, you agree to our terms and privacy policy.</p>
             </form>
           )}

@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { WaitlistForm } from "@/components/WaitlistForm";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -282,17 +283,20 @@ function Landing() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* CTA + Waitlist */}
       <section className="container-page pb-24">
         <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-12 text-center shadow-elev">
           <div className="absolute inset-0 gradient-hero opacity-70" />
           <div className="relative">
             <Users className="mx-auto h-8 w-8 text-primary" />
             <h2 className="mt-4 text-3xl font-semibold tracking-tight md:text-4xl">Ready to hire on proof?</h2>
-            <p className="mx-auto mt-3 max-w-xl text-muted-foreground">Set up your first challenge in under 5 minutes.</p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Button asChild size="lg"><Link to="/auth/signup">Get started free</Link></Button>
-              <Button asChild size="lg" variant="outline"><Link to="/book-demo">Book a demo</Link></Button>
+            <p className="mx-auto mt-3 max-w-xl text-muted-foreground">Join the waitlist — we'll email your invite as soon as your account is ready.</p>
+            <div className="mt-8">
+              <WaitlistForm source="landing_cta" />
+            </div>
+            <div className="mt-6 flex flex-wrap justify-center gap-3 text-sm">
+              <Button asChild size="sm" variant="outline"><Link to="/auth/signup">Create free account</Link></Button>
+              <Button asChild size="sm" variant="ghost"><Link to="/book-demo">Book a demo instead</Link></Button>
             </div>
           </div>
         </div>
