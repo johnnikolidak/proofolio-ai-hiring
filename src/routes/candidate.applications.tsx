@@ -1,58 +1,85 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/DashboardShell";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/candidate/applications")({ component: Applications });
 
-type Status = "In review" | "Interview" | "Offer" | "Rejected" | "Submitted";
-const apps: { role: string; company: string; stage: Status; date: string; score?: number }[] = [
-  { role: "Junior Growth Analyst", company: "Northwind Labs", stage: "Interview", date: "Aug 4", score: 91 },
-  { role: "Associate PM", company: "Lumen", stage: "In review", date: "Jul 30", score: 84 },
-  { role: "Data Analyst Intern", company: "Foundry", stage: "Offer", date: "Jul 25", score: 93 },
-  { role: "Marketing Associate", company: "Vela", stage: "Submitted", date: "Jul 22" },
-  { role: "Frontend Engineer I", company: "Kinetic", stage: "Rejected", date: "Jul 12", score: 68 },
-];
+type Row = {
+  id: string;
+  job_id: string;
+  status: string;
+  created_at: string;
+  jobs: { title: string; company_name: string } | null;
+};
 
-const tone: Record<Status, string> = {
-  "In review": "bg-warning/15 text-warning-foreground",
-  Interview: "bg-primary/15 text-primary",
-  Offer: "bg-success/15 text-success",
-  Rejected: "bg-destructive/15 text-destructive",
-  Submitted: "bg-secondary text-muted-foreground",
+const tone: Record<string, string> = {
+  submitted: "bg-secondary text-muted-foreground",
+  in_review: "bg-warning/15 text-warning-foreground",
+  interview: "bg-primary/15 text-primary",
+  offer: "bg-success/15 text-success",
+  rejected: "bg-destructive/15 text-destructive",
+  withdrawn: "bg-secondary text-muted-foreground",
 };
 
 function Applications() {
+  const { user } = useAuth();
+  const appsQ = useQuery({
+    enabled: !!user?.id,
+    queryKey: ["candidate", "applications", "full", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("applications")
+        .select("id,job_id,status,created_at,jobs(title,company_name)")
+        .eq("candidate_id", user!.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as Row[];
+    },
+  });
+
   return (
     <>
       <PageHeader title="Applications" description="Track every application in one place." />
-      <div className="rounded-xl border border-border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Role</TableHead>
-              <TableHead>Company</TableHead>
-              <TableHead>Stage</TableHead>
-              <TableHead>Applied</TableHead>
-              <TableHead>Score</TableHead>
-              <TableHead></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {apps.map((a) => (
-              <TableRow key={a.role}>
-                <TableCell className="font-medium">{a.role}</TableCell>
-                <TableCell className="text-muted-foreground">{a.company}</TableCell>
-                <TableCell><Badge className={`rounded-full font-medium ${tone[a.stage]}`} variant="secondary">{a.stage}</Badge></TableCell>
-                <TableCell className="text-muted-foreground">{a.date}</TableCell>
-                <TableCell>{a.score ?? "—"}</TableCell>
-                <TableCell><Button size="sm" variant="ghost">View</Button></TableCell>
+      {appsQ.isLoading ? (
+        <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+      ) : (appsQ.data ?? []).length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
+          <p className="text-sm text-muted-foreground">You haven't applied to any jobs yet.</p>
+          <Button asChild className="mt-4"><Link to="/candidate/jobs">Browse jobs</Link></Button>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Role</TableHead>
+                <TableHead>Company</TableHead>
+                <TableHead>Stage</TableHead>
+                <TableHead>Applied</TableHead>
+                <TableHead></TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {(appsQ.data ?? []).map((a) => (
+                <TableRow key={a.id}>
+                  <TableCell className="font-medium">{a.jobs?.title ?? "—"}</TableCell>
+                  <TableCell className="text-muted-foreground">{a.jobs?.company_name ?? "—"}</TableCell>
+                  <TableCell><Badge className={`rounded-full font-medium ${tone[a.status] ?? tone.submitted}`} variant="secondary">{a.status.replace("_", " ")}</Badge></TableCell>
+                  <TableCell className="text-muted-foreground">{format(new Date(a.created_at), "MMM d")}</TableCell>
+                  <TableCell><Button asChild size="sm" variant="ghost"><Link to="/candidate/jobs/$id" params={{ id: a.job_id }}>View</Link></Button></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </>
   );
 }

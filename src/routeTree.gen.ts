@@ -31,11 +31,13 @@ import { Route as UniversityEvidenceRouteImport } from './routes/university.evid
 import { Route as UniversityChallengesRouteImport } from './routes/university.challenges'
 import { Route as UniversityCertificatesRouteImport } from './routes/university.certificates'
 import { Route as UniversityAnalyticsRouteImport } from './routes/university.analytics'
+import { Route as PIdRouteImport } from './routes/p.$id'
 import { Route as CompanyShortlistsRouteImport } from './routes/company.shortlists'
 import { Route as CompanySettingsRouteImport } from './routes/company.settings'
 import { Route as CompanyReportsRouteImport } from './routes/company.reports'
 import { Route as CompanyMessagesRouteImport } from './routes/company.messages'
 import { Route as CompanyLibraryRouteImport } from './routes/company.library'
+import { Route as CompanyJobsRouteImport } from './routes/company.jobs'
 import { Route as CompanyInterviewsRouteImport } from './routes/company.interviews'
 import { Route as CompanyChallengeBuilderRouteImport } from './routes/company.challenge-builder'
 import { Route as CompanyCandidatesRouteImport } from './routes/company.candidates'
@@ -58,6 +60,8 @@ import { Route as AuthSignupRouteImport } from './routes/auth.signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
+import { Route as CandidateJobsIdRouteImport } from './routes/candidate.jobs.$id'
+import { Route as CandidateChallengesIdRouteImport } from './routes/candidate.challenges.$id'
 
 const UniversityRoute = UniversityRouteImport.update({
   id: '/university',
@@ -169,6 +173,11 @@ const UniversityAnalyticsRoute = UniversityAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => UniversityRoute,
 } as any)
+const PIdRoute = PIdRouteImport.update({
+  id: '/p/$id',
+  path: '/p/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompanyShortlistsRoute = CompanyShortlistsRouteImport.update({
   id: '/shortlists',
   path: '/shortlists',
@@ -192,6 +201,11 @@ const CompanyMessagesRoute = CompanyMessagesRouteImport.update({
 const CompanyLibraryRoute = CompanyLibraryRouteImport.update({
   id: '/library',
   path: '/library',
+  getParentRoute: () => CompanyRoute,
+} as any)
+const CompanyJobsRoute = CompanyJobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
   getParentRoute: () => CompanyRoute,
 } as any)
 const CompanyInterviewsRoute = CompanyInterviewsRouteImport.update({
@@ -304,6 +318,16 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   path: '/auth/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CandidateJobsIdRoute = CandidateJobsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => CandidateJobsRoute,
+} as any)
+const CandidateChallengesIdRoute = CandidateChallengesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => CandidateChallengesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -323,9 +347,9 @@ export interface FileRoutesByFullPath {
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/candidate/applications': typeof CandidateApplicationsRoute
   '/candidate/certificates': typeof CandidateCertificatesRoute
-  '/candidate/challenges': typeof CandidateChallengesRoute
+  '/candidate/challenges': typeof CandidateChallengesRouteWithChildren
   '/candidate/interview': typeof CandidateInterviewRoute
-  '/candidate/jobs': typeof CandidateJobsRoute
+  '/candidate/jobs': typeof CandidateJobsRouteWithChildren
   '/candidate/messages': typeof CandidateMessagesRoute
   '/candidate/notifications': typeof CandidateNotificationsRoute
   '/candidate/profile': typeof CandidateProfileRoute
@@ -338,11 +362,13 @@ export interface FileRoutesByFullPath {
   '/company/candidates': typeof CompanyCandidatesRoute
   '/company/challenge-builder': typeof CompanyChallengeBuilderRoute
   '/company/interviews': typeof CompanyInterviewsRoute
+  '/company/jobs': typeof CompanyJobsRoute
   '/company/library': typeof CompanyLibraryRoute
   '/company/messages': typeof CompanyMessagesRoute
   '/company/reports': typeof CompanyReportsRoute
   '/company/settings': typeof CompanySettingsRoute
   '/company/shortlists': typeof CompanyShortlistsRoute
+  '/p/$id': typeof PIdRoute
   '/university/analytics': typeof UniversityAnalyticsRoute
   '/university/certificates': typeof UniversityCertificatesRoute
   '/university/challenges': typeof UniversityChallengesRoute
@@ -355,6 +381,8 @@ export interface FileRoutesByFullPath {
   '/candidate/': typeof CandidateIndexRoute
   '/company/': typeof CompanyIndexRoute
   '/university/': typeof UniversityIndexRoute
+  '/candidate/challenges/$id': typeof CandidateChallengesIdRoute
+  '/candidate/jobs/$id': typeof CandidateJobsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -371,9 +399,9 @@ export interface FileRoutesByTo {
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/candidate/applications': typeof CandidateApplicationsRoute
   '/candidate/certificates': typeof CandidateCertificatesRoute
-  '/candidate/challenges': typeof CandidateChallengesRoute
+  '/candidate/challenges': typeof CandidateChallengesRouteWithChildren
   '/candidate/interview': typeof CandidateInterviewRoute
-  '/candidate/jobs': typeof CandidateJobsRoute
+  '/candidate/jobs': typeof CandidateJobsRouteWithChildren
   '/candidate/messages': typeof CandidateMessagesRoute
   '/candidate/notifications': typeof CandidateNotificationsRoute
   '/candidate/profile': typeof CandidateProfileRoute
@@ -386,11 +414,13 @@ export interface FileRoutesByTo {
   '/company/candidates': typeof CompanyCandidatesRoute
   '/company/challenge-builder': typeof CompanyChallengeBuilderRoute
   '/company/interviews': typeof CompanyInterviewsRoute
+  '/company/jobs': typeof CompanyJobsRoute
   '/company/library': typeof CompanyLibraryRoute
   '/company/messages': typeof CompanyMessagesRoute
   '/company/reports': typeof CompanyReportsRoute
   '/company/settings': typeof CompanySettingsRoute
   '/company/shortlists': typeof CompanyShortlistsRoute
+  '/p/$id': typeof PIdRoute
   '/university/analytics': typeof UniversityAnalyticsRoute
   '/university/certificates': typeof UniversityCertificatesRoute
   '/university/challenges': typeof UniversityChallengesRoute
@@ -403,6 +433,8 @@ export interface FileRoutesByTo {
   '/candidate': typeof CandidateIndexRoute
   '/company': typeof CompanyIndexRoute
   '/university': typeof UniversityIndexRoute
+  '/candidate/challenges/$id': typeof CandidateChallengesIdRoute
+  '/candidate/jobs/$id': typeof CandidateJobsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -423,9 +455,9 @@ export interface FileRoutesById {
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/candidate/applications': typeof CandidateApplicationsRoute
   '/candidate/certificates': typeof CandidateCertificatesRoute
-  '/candidate/challenges': typeof CandidateChallengesRoute
+  '/candidate/challenges': typeof CandidateChallengesRouteWithChildren
   '/candidate/interview': typeof CandidateInterviewRoute
-  '/candidate/jobs': typeof CandidateJobsRoute
+  '/candidate/jobs': typeof CandidateJobsRouteWithChildren
   '/candidate/messages': typeof CandidateMessagesRoute
   '/candidate/notifications': typeof CandidateNotificationsRoute
   '/candidate/profile': typeof CandidateProfileRoute
@@ -438,11 +470,13 @@ export interface FileRoutesById {
   '/company/candidates': typeof CompanyCandidatesRoute
   '/company/challenge-builder': typeof CompanyChallengeBuilderRoute
   '/company/interviews': typeof CompanyInterviewsRoute
+  '/company/jobs': typeof CompanyJobsRoute
   '/company/library': typeof CompanyLibraryRoute
   '/company/messages': typeof CompanyMessagesRoute
   '/company/reports': typeof CompanyReportsRoute
   '/company/settings': typeof CompanySettingsRoute
   '/company/shortlists': typeof CompanyShortlistsRoute
+  '/p/$id': typeof PIdRoute
   '/university/analytics': typeof UniversityAnalyticsRoute
   '/university/certificates': typeof UniversityCertificatesRoute
   '/university/challenges': typeof UniversityChallengesRoute
@@ -455,6 +489,8 @@ export interface FileRoutesById {
   '/candidate/': typeof CandidateIndexRoute
   '/company/': typeof CompanyIndexRoute
   '/university/': typeof UniversityIndexRoute
+  '/candidate/challenges/$id': typeof CandidateChallengesIdRoute
+  '/candidate/jobs/$id': typeof CandidateJobsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -491,11 +527,13 @@ export interface FileRouteTypes {
     | '/company/candidates'
     | '/company/challenge-builder'
     | '/company/interviews'
+    | '/company/jobs'
     | '/company/library'
     | '/company/messages'
     | '/company/reports'
     | '/company/settings'
     | '/company/shortlists'
+    | '/p/$id'
     | '/university/analytics'
     | '/university/certificates'
     | '/university/challenges'
@@ -508,6 +546,8 @@ export interface FileRouteTypes {
     | '/candidate/'
     | '/company/'
     | '/university/'
+    | '/candidate/challenges/$id'
+    | '/candidate/jobs/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -539,11 +579,13 @@ export interface FileRouteTypes {
     | '/company/candidates'
     | '/company/challenge-builder'
     | '/company/interviews'
+    | '/company/jobs'
     | '/company/library'
     | '/company/messages'
     | '/company/reports'
     | '/company/settings'
     | '/company/shortlists'
+    | '/p/$id'
     | '/university/analytics'
     | '/university/certificates'
     | '/university/challenges'
@@ -556,6 +598,8 @@ export interface FileRouteTypes {
     | '/candidate'
     | '/company'
     | '/university'
+    | '/candidate/challenges/$id'
+    | '/candidate/jobs/$id'
   id:
     | '__root__'
     | '/'
@@ -590,11 +634,13 @@ export interface FileRouteTypes {
     | '/company/candidates'
     | '/company/challenge-builder'
     | '/company/interviews'
+    | '/company/jobs'
     | '/company/library'
     | '/company/messages'
     | '/company/reports'
     | '/company/settings'
     | '/company/shortlists'
+    | '/p/$id'
     | '/university/analytics'
     | '/university/certificates'
     | '/university/challenges'
@@ -607,6 +653,8 @@ export interface FileRouteTypes {
     | '/candidate/'
     | '/company/'
     | '/university/'
+    | '/candidate/challenges/$id'
+    | '/candidate/jobs/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -625,6 +673,7 @@ export interface RootRouteChildren {
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthSignupRoute: typeof AuthSignupRoute
   AuthVerifyEmailRoute: typeof AuthVerifyEmailRoute
+  PIdRoute: typeof PIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -783,6 +832,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UniversityAnalyticsRouteImport
       parentRoute: typeof UniversityRoute
     }
+    '/p/$id': {
+      id: '/p/$id'
+      path: '/p/$id'
+      fullPath: '/p/$id'
+      preLoaderRoute: typeof PIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/company/shortlists': {
       id: '/company/shortlists'
       path: '/shortlists'
@@ -816,6 +872,13 @@ declare module '@tanstack/react-router' {
       path: '/library'
       fullPath: '/company/library'
       preLoaderRoute: typeof CompanyLibraryRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/jobs': {
+      id: '/company/jobs'
+      path: '/jobs'
+      fullPath: '/company/jobs'
+      preLoaderRoute: typeof CompanyJobsRouteImport
       parentRoute: typeof CompanyRoute
     }
     '/company/interviews': {
@@ -972,15 +1035,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/candidate/jobs/$id': {
+      id: '/candidate/jobs/$id'
+      path: '/$id'
+      fullPath: '/candidate/jobs/$id'
+      preLoaderRoute: typeof CandidateJobsIdRouteImport
+      parentRoute: typeof CandidateJobsRoute
+    }
+    '/candidate/challenges/$id': {
+      id: '/candidate/challenges/$id'
+      path: '/$id'
+      fullPath: '/candidate/challenges/$id'
+      preLoaderRoute: typeof CandidateChallengesIdRouteImport
+      parentRoute: typeof CandidateChallengesRoute
+    }
   }
 }
+
+interface CandidateChallengesRouteChildren {
+  CandidateChallengesIdRoute: typeof CandidateChallengesIdRoute
+}
+
+const CandidateChallengesRouteChildren: CandidateChallengesRouteChildren = {
+  CandidateChallengesIdRoute: CandidateChallengesIdRoute,
+}
+
+const CandidateChallengesRouteWithChildren =
+  CandidateChallengesRoute._addFileChildren(CandidateChallengesRouteChildren)
+
+interface CandidateJobsRouteChildren {
+  CandidateJobsIdRoute: typeof CandidateJobsIdRoute
+}
+
+const CandidateJobsRouteChildren: CandidateJobsRouteChildren = {
+  CandidateJobsIdRoute: CandidateJobsIdRoute,
+}
+
+const CandidateJobsRouteWithChildren = CandidateJobsRoute._addFileChildren(
+  CandidateJobsRouteChildren,
+)
 
 interface CandidateRouteChildren {
   CandidateApplicationsRoute: typeof CandidateApplicationsRoute
   CandidateCertificatesRoute: typeof CandidateCertificatesRoute
-  CandidateChallengesRoute: typeof CandidateChallengesRoute
+  CandidateChallengesRoute: typeof CandidateChallengesRouteWithChildren
   CandidateInterviewRoute: typeof CandidateInterviewRoute
-  CandidateJobsRoute: typeof CandidateJobsRoute
+  CandidateJobsRoute: typeof CandidateJobsRouteWithChildren
   CandidateMessagesRoute: typeof CandidateMessagesRoute
   CandidateNotificationsRoute: typeof CandidateNotificationsRoute
   CandidateProfileRoute: typeof CandidateProfileRoute
@@ -993,9 +1093,9 @@ interface CandidateRouteChildren {
 const CandidateRouteChildren: CandidateRouteChildren = {
   CandidateApplicationsRoute: CandidateApplicationsRoute,
   CandidateCertificatesRoute: CandidateCertificatesRoute,
-  CandidateChallengesRoute: CandidateChallengesRoute,
+  CandidateChallengesRoute: CandidateChallengesRouteWithChildren,
   CandidateInterviewRoute: CandidateInterviewRoute,
-  CandidateJobsRoute: CandidateJobsRoute,
+  CandidateJobsRoute: CandidateJobsRouteWithChildren,
   CandidateMessagesRoute: CandidateMessagesRoute,
   CandidateNotificationsRoute: CandidateNotificationsRoute,
   CandidateProfileRoute: CandidateProfileRoute,
@@ -1016,6 +1116,7 @@ interface CompanyRouteChildren {
   CompanyCandidatesRoute: typeof CompanyCandidatesRoute
   CompanyChallengeBuilderRoute: typeof CompanyChallengeBuilderRoute
   CompanyInterviewsRoute: typeof CompanyInterviewsRoute
+  CompanyJobsRoute: typeof CompanyJobsRoute
   CompanyLibraryRoute: typeof CompanyLibraryRoute
   CompanyMessagesRoute: typeof CompanyMessagesRoute
   CompanyReportsRoute: typeof CompanyReportsRoute
@@ -1031,6 +1132,7 @@ const CompanyRouteChildren: CompanyRouteChildren = {
   CompanyCandidatesRoute: CompanyCandidatesRoute,
   CompanyChallengeBuilderRoute: CompanyChallengeBuilderRoute,
   CompanyInterviewsRoute: CompanyInterviewsRoute,
+  CompanyJobsRoute: CompanyJobsRoute,
   CompanyLibraryRoute: CompanyLibraryRoute,
   CompanyMessagesRoute: CompanyMessagesRoute,
   CompanyReportsRoute: CompanyReportsRoute,
@@ -1088,6 +1190,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthSignupRoute: AuthSignupRoute,
   AuthVerifyEmailRoute: AuthVerifyEmailRoute,
+  PIdRoute: PIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

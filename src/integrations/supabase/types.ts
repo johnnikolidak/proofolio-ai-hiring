@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      applications: {
+        Row: {
+          candidate_id: string
+          cover_note: string | null
+          created_at: string
+          id: string
+          job_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          candidate_id: string
+          cover_note?: string | null
+          created_at?: string
+          id?: string
+          job_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          candidate_id?: string
+          cover_note?: string | null
+          created_at?: string
+          id?: string
+          job_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaigns: {
         Row: {
           challenge_id: string | null
@@ -51,6 +89,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "campaigns_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_attempts: {
+        Row: {
+          candidate_id: string
+          challenge_id: string
+          content: string | null
+          created_at: string
+          file_url: string | null
+          id: string
+          status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          candidate_id: string
+          challenge_id: string
+          content?: string | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          candidate_id?: string
+          challenge_id?: string
+          content?: string | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_attempts_challenge_id_fkey"
             columns: ["challenge_id"]
             isOneToOne: false
             referencedRelation: "challenges"
@@ -148,6 +230,87 @@ export type Database = {
         }
         Relationships: []
       }
+      email_log: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          payload: Json
+          status: string
+          subject: string
+          template: string
+          to_addr: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json
+          status?: string
+          subject: string
+          template: string
+          to_addr: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json
+          status?: string
+          subject?: string
+          template?: string
+          to_addr?: string
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          company_name: string
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          owner_id: string
+          remote: boolean
+          requirements: string | null
+          salary_range: string | null
+          status: string
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          owner_id: string
+          remote?: boolean
+          requirements?: string | null
+          salary_range?: string | null
+          status?: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          owner_id?: string
+          remote?: boolean
+          requirements?: string | null
+          salary_range?: string | null
+          status?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       partnership_requests: {
         Row: {
           contact_name: string
@@ -195,33 +358,66 @@ export type Database = {
       }
       profiles: {
         Row: {
+          availability: string | null
           avatar_url: string | null
+          bio: string | null
           company_name: string | null
+          completion_pct: number
           created_at: string
+          education: Json
           email: string
+          experience: Json
           full_name: string | null
+          headline: string | null
           id: string
+          is_public: boolean
+          links: Json
+          location: string | null
+          preferred_roles: string[]
           role: Database["public"]["Enums"]["app_role"]
+          skills: string[]
           updated_at: string
         }
         Insert: {
+          availability?: string | null
           avatar_url?: string | null
+          bio?: string | null
           company_name?: string | null
+          completion_pct?: number
           created_at?: string
+          education?: Json
           email: string
+          experience?: Json
           full_name?: string | null
+          headline?: string | null
           id: string
+          is_public?: boolean
+          links?: Json
+          location?: string | null
+          preferred_roles?: string[]
           role?: Database["public"]["Enums"]["app_role"]
+          skills?: string[]
           updated_at?: string
         }
         Update: {
+          availability?: string | null
           avatar_url?: string | null
+          bio?: string | null
           company_name?: string | null
+          completion_pct?: number
           created_at?: string
+          education?: Json
           email?: string
+          experience?: Json
           full_name?: string | null
+          headline?: string | null
           id?: string
+          is_public?: boolean
+          links?: Json
+          location?: string | null
+          preferred_roles?: string[]
           role?: Database["public"]["Enums"]["app_role"]
+          skills?: string[]
           updated_at?: string
         }
         Relationships: []

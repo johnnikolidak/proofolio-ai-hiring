@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.trg_profile_completion() FROM PUBLIC, anon, authenticated;

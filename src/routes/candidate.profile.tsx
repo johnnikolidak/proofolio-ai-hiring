@@ -1,65 +1,333 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { z } from "zod";
+import { Loader2, Upload, X, Plus, ExternalLink, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Switch } from "@/components/ui/switch";
+import { Progress } from "@/components/ui/progress";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/candidate/profile")({ component: Profile });
 
+type Experience = { title: string; company: string; from: string; to: string; description?: string };
+type Education = { school: string; degree: string; year: string };
+type Links = { website?: string; linkedin?: string; github?: string; twitter?: string };
+
+const AVATAR_MAX_BYTES = 3 * 1024 * 1024;
+const AVATAR_MIME = ["image/png", "image/jpeg", "image/webp"];
+
 function Profile() {
+  const { user, refreshProfile } = useAuth();
+  const qc = useQueryClient();
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [signedAvatar, setSignedAvatar] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const profileQ = useQuery({
+    enabled: !!user?.id,
+    queryKey: ["candidate", "profile", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("profiles").select("*").eq("id", user!.id).single();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // form state derived from server value
+  const [form, setForm] = useState({
+    full_name: "",
+    headline: "",
+    bio: "",
+    location: "",
+    availability: "",
+    is_public: false,
+    skills: [] as string[],
+    preferred_roles: [] as string[],
+    education: [] as Education[],
+    experience: [] as Experience[],
+    links: {} as Links,
+  });
+  const [skillDraft, setSkillDraft] = useState("");
+  const [roleDraft, setRoleDraft] = useState("");
+
+  useEffect(() => {
+    const p = profileQ.data;
+    if (!p) return;
+    setForm({
+      full_name: p.full_name ?? "",
+      headline: p.headline ?? "",
+      bio: p.bio ?? "",
+      location: p.location ?? "",
+      availability: p.availability ?? "",
+      is_public: p.is_public ?? false,
+      skills: (p.skills as string[]) ?? [],
+      preferred_roles: (p.preferred_roles as string[]) ?? [],
+      education: ((p.education as unknown as Education[]) ?? []),
+      experience: ((p.experience as unknown as Experience[]) ?? []),
+      links: ((p.links as unknown as Links) ?? {}),
+    });
+  }, [profileQ.data]);
+
+  // Sign avatar URL if present (private bucket)
+  useEffect(() => {
+    const path = profileQ.data?.avatar_url;
+    if (!path) { setSignedAvatar(null); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60);
+      if (!cancelled) setSignedAvatar(data?.signedUrl ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [profileQ.data?.avatar_url]);
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const validated = z.object({
+        full_name: z.string().trim().max(120),
+        headline: z.string().trim().max(160),
+        bio: z.string().trim().max(2000),
+        location: z.string().trim().max(120),
+        availability: z.string().trim().max(60),
+        is_public: z.boolean(),
+        skills: z.array(z.string().trim().min(1).max(40)).max(50),
+        preferred_roles: z.array(z.string().trim().min(1).max(60)).max(20),
+        education: z.array(z.object({ school: z.string(), degree: z.string(), year: z.string() })),
+        experience: z.array(z.object({ title: z.string(), company: z.string(), from: z.string(), to: z.string(), description: z.string().optional() })),
+        links: z.object({ website: z.string().url().optional().or(z.literal("")), linkedin: z.string().url().optional().or(z.literal("")), github: z.string().url().optional().or(z.literal("")), twitter: z.string().url().optional().or(z.literal("")) }).partial(),
+      }).parse(form);
+      const { error } = await supabase.from("profiles").update({
+        full_name: validated.full_name || null,
+        headline: validated.headline || null,
+        bio: validated.bio || null,
+        location: validated.location || null,
+        availability: validated.availability || null,
+        is_public: validated.is_public,
+        skills: validated.skills,
+        preferred_roles: validated.preferred_roles,
+        education: validated.education as never,
+        experience: validated.experience as never,
+        links: validated.links as never,
+      }).eq("id", user!.id);
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      toast.success("Profile saved");
+      await qc.invalidateQueries({ queryKey: ["candidate", "profile"] });
+      await refreshProfile();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const handleAvatar = async (file: File) => {
+    if (!AVATAR_MIME.includes(file.type)) { toast.error("Use PNG, JPG or WebP"); return; }
+    if (file.size > AVATAR_MAX_BYTES) { toast.error("Image must be under 3 MB"); return; }
+    setAvatarUploading(true);
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const path = `${user!.id}/avatar-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
+    if (upErr) { setAvatarUploading(false); toast.error(upErr.message); return; }
+    // Remove old
+    if (profileQ.data?.avatar_url && profileQ.data.avatar_url !== path) {
+      await supabase.storage.from("avatars").remove([profileQ.data.avatar_url]);
+    }
+    const { error: pErr } = await supabase.from("profiles").update({ avatar_url: path }).eq("id", user!.id);
+    setAvatarUploading(false);
+    if (pErr) { toast.error(pErr.message); return; }
+    toast.success("Photo updated");
+    await qc.invalidateQueries({ queryKey: ["candidate", "profile"] });
+    await refreshProfile();
+  };
+
+  const removeAvatar = async () => {
+    if (!profileQ.data?.avatar_url) return;
+    await supabase.storage.from("avatars").remove([profileQ.data.avatar_url]);
+    await supabase.from("profiles").update({ avatar_url: null }).eq("id", user!.id);
+    toast.success("Photo removed");
+    await qc.invalidateQueries({ queryKey: ["candidate", "profile"] });
+    await refreshProfile();
+  };
+
+  if (profileQ.isLoading) return <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+  if (profileQ.error) return <div className="rounded-xl border border-border bg-card p-6 text-sm text-destructive">Failed to load profile.</div>;
+
+  const p = profileQ.data!;
+  const completion = p.completion_pct ?? 0;
+  const initials = (form.full_name || p.email || "?").split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
+
+  const addSkill = () => {
+    const v = skillDraft.trim();
+    if (!v || form.skills.includes(v)) { setSkillDraft(""); return; }
+    setForm({ ...form, skills: [...form.skills, v] });
+    setSkillDraft("");
+  };
+  const addRole = () => {
+    const v = roleDraft.trim();
+    if (!v || form.preferred_roles.includes(v)) { setRoleDraft(""); return; }
+    setForm({ ...form, preferred_roles: [...form.preferred_roles, v] });
+    setRoleDraft("");
+  };
+
   return (
     <>
-      <PageHeader title="Profile" description="Your public portfolio, seen by hiring teams." actions={<Button>Preview public profile</Button>} />
+      <PageHeader
+        title="Proof Profile"
+        description="Your public portfolio, seen by hiring teams."
+        actions={
+          <>
+            {p.is_public && (
+              <Button asChild variant="outline"><Link to="/p/$id" params={{ id: p.id }}><ExternalLink className="mr-1.5 h-4 w-4" />View public profile</Link></Button>
+            )}
+            <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+              {saveMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save changes
+            </Button>
+          </>
+        }
+      />
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-        <div className="rounded-xl border border-border bg-card p-6 text-center">
-          <Avatar className="mx-auto h-24 w-24"><AvatarFallback className="bg-primary text-primary-foreground text-xl">SA</AvatarFallback></Avatar>
-          <div className="mt-4 font-semibold">Sofía Alvarez</div>
-          <div className="text-xs text-muted-foreground">Aspiring Product Analyst · Madrid</div>
-          <div className="mt-4 flex flex-wrap justify-center gap-1.5">
-            <Badge variant="secondary" className="rounded-full">Open to roles</Badge>
-            <Badge variant="secondary" className="rounded-full">Remote OK</Badge>
-          </div>
-          <Button variant="outline" size="sm" className="mt-4 w-full">Change photo</Button>
-        </div>
-        <div className="space-y-6">
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h3 className="font-semibold">About</h3>
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <div className="space-y-1.5"><Label>Headline</Label><Input defaultValue="Aspiring Product Analyst · ex-Vela intern" /></div>
-              <div className="space-y-1.5"><Label>Location</Label><Input defaultValue="Madrid, Spain" /></div>
-              <div className="md:col-span-2 space-y-1.5"><Label>Bio</Label>
-                <Textarea rows={4} defaultValue="Business student turned data enthusiast. Built cohort analyses at Vela and Kinetic that shifted product priorities. Looking for a junior analyst or associate PM role." />
-              </div>
+        <div className="space-y-4">
+          <div className="rounded-xl border border-border bg-card p-6 text-center">
+            <Avatar className="mx-auto h-24 w-24">
+              {signedAvatar ? <AvatarImage src={signedAvatar} alt={form.full_name} /> : null}
+              <AvatarFallback className="bg-primary text-primary-foreground text-xl">{initials}</AvatarFallback>
+            </Avatar>
+            <div className="mt-4 font-semibold">{form.full_name || "Add your name"}</div>
+            <div className="text-xs text-muted-foreground">{form.headline || "Add a headline"}</div>
+            <input ref={fileRef} type="file" accept={AVATAR_MIME.join(",")} className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatar(f); e.target.value = ""; }} />
+            <div className="mt-4 flex gap-2">
+              <Button variant="outline" size="sm" className="flex-1" onClick={() => fileRef.current?.click()} disabled={avatarUploading}>
+                {avatarUploading ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : <Upload className="mr-1.5 h-3 w-3" />}
+                {p.avatar_url ? "Replace" : "Upload"}
+              </Button>
+              {p.avatar_url && <Button variant="ghost" size="sm" onClick={removeAvatar}><Trash2 className="h-3 w-3" /></Button>}
             </div>
           </div>
           <div className="rounded-xl border border-border bg-card p-6">
-            <h3 className="font-semibold">Skills</h3>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {["SQL", "Excel", "Python", "Growth", "Product", "A/B testing", "Communication", "SaaS", "Analytics"].map((s) => (
-                <Badge key={s} variant="outline" className="rounded-full">{s}</Badge>
+            <div className="flex items-center justify-between text-sm"><span className="font-medium">Profile completeness</span><span className="text-primary font-semibold">{completion}%</span></div>
+            <Progress value={completion} className="mt-2" />
+            <p className="mt-3 text-xs text-muted-foreground">A complete profile gets 3× more views from recruiters.</p>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium">Public profile</div>
+                <div className="text-xs text-muted-foreground">Allow recruiters and universities to find you.</div>
+              </div>
+              <Switch checked={form.is_public} onCheckedChange={(v) => setForm({ ...form, is_public: v })} />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <Card title="About">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Full name"><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="Your name" /></Field>
+              <Field label="Headline"><Input value={form.headline} onChange={(e) => setForm({ ...form, headline: e.target.value })} placeholder="e.g. Aspiring Product Analyst" /></Field>
+              <Field label="Location"><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="City, Country" /></Field>
+              <Field label="Availability"><Input value={form.availability} onChange={(e) => setForm({ ...form, availability: e.target.value })} placeholder="e.g. Immediate, in 3 months" /></Field>
+              <div className="md:col-span-2"><Field label="Bio"><Textarea rows={4} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} placeholder="Tell hiring teams who you are and what you're building." /></Field></div>
+            </div>
+          </Card>
+
+          <Card title="Skills" description={form.skills.length === 0 ? "Add at least 3 skills to be discoverable." : undefined}>
+            <div className="flex gap-2">
+              <Input value={skillDraft} onChange={(e) => setSkillDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }} placeholder="Add a skill (press Enter)" />
+              <Button variant="outline" onClick={addSkill}><Plus className="h-4 w-4" /></Button>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {form.skills.length === 0 ? <div className="text-xs text-muted-foreground">No skills yet.</div> : form.skills.map((s) => (
+                <Badge key={s} variant="outline" className="gap-1 rounded-full">
+                  {s}
+                  <button onClick={() => setForm({ ...form, skills: form.skills.filter((x) => x !== s) })} aria-label={`Remove ${s}`}><X className="h-3 w-3" /></button>
+                </Badge>
               ))}
             </div>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h3 className="font-semibold">Featured work</h3>
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              {[
-                { t: "Vela cohort retention teardown", s: 94 },
-                { t: "Kinetic pricing experiment", s: 88 },
-                { t: "Northwind SQL analytics", s: 91 },
-              ].map((w) => (
-                <div key={w.t} className="rounded-lg border border-border p-4">
-                  <div className="font-medium">{w.t}</div>
-                  <div className="mt-1 text-xs text-muted-foreground">Score {w.s}</div>
+          </Card>
+
+          <Card title="Preferred roles">
+            <div className="flex gap-2">
+              <Input value={roleDraft} onChange={(e) => setRoleDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addRole(); } }} placeholder="e.g. Product Analyst" />
+              <Button variant="outline" onClick={addRole}><Plus className="h-4 w-4" /></Button>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {form.preferred_roles.length === 0 ? <div className="text-xs text-muted-foreground">No roles yet.</div> : form.preferred_roles.map((s) => (
+                <Badge key={s} variant="secondary" className="gap-1 rounded-full">
+                  {s}
+                  <button onClick={() => setForm({ ...form, preferred_roles: form.preferred_roles.filter((x) => x !== s) })} aria-label={`Remove ${s}`}><X className="h-3 w-3" /></button>
+                </Badge>
+              ))}
+            </div>
+          </Card>
+
+          <Card title="Experience">
+            <div className="space-y-3">
+              {form.experience.map((x, i) => (
+                <div key={i} className="grid gap-2 rounded-lg border border-border p-3 md:grid-cols-2">
+                  <Input value={x.title} onChange={(e) => updateExp(i, { title: e.target.value })} placeholder="Role" />
+                  <Input value={x.company} onChange={(e) => updateExp(i, { company: e.target.value })} placeholder="Company" />
+                  <Input value={x.from} onChange={(e) => updateExp(i, { from: e.target.value })} placeholder="From (e.g. Jan 2024)" />
+                  <Input value={x.to} onChange={(e) => updateExp(i, { to: e.target.value })} placeholder="To (or 'Present')" />
+                  <div className="md:col-span-2"><Textarea rows={2} value={x.description ?? ""} onChange={(e) => updateExp(i, { description: e.target.value })} placeholder="What did you do or ship?" /></div>
+                  <div className="md:col-span-2 flex justify-end"><Button size="sm" variant="ghost" onClick={() => setForm({ ...form, experience: form.experience.filter((_, k) => k !== i) })}><Trash2 className="h-3 w-3" /></Button></div>
                 </div>
               ))}
+              <Button variant="outline" size="sm" onClick={() => setForm({ ...form, experience: [...form.experience, { title: "", company: "", from: "", to: "" }] })}><Plus className="mr-1 h-3 w-3" /> Add experience</Button>
             </div>
-          </div>
+          </Card>
+
+          <Card title="Education">
+            <div className="space-y-3">
+              {form.education.map((x, i) => (
+                <div key={i} className="grid gap-2 rounded-lg border border-border p-3 md:grid-cols-3">
+                  <Input value={x.school} onChange={(e) => updateEdu(i, { school: e.target.value })} placeholder="School" />
+                  <Input value={x.degree} onChange={(e) => updateEdu(i, { degree: e.target.value })} placeholder="Degree" />
+                  <Input value={x.year} onChange={(e) => updateEdu(i, { year: e.target.value })} placeholder="Year" />
+                  <div className="md:col-span-3 flex justify-end"><Button size="sm" variant="ghost" onClick={() => setForm({ ...form, education: form.education.filter((_, k) => k !== i) })}><Trash2 className="h-3 w-3" /></Button></div>
+                </div>
+              ))}
+              <Button variant="outline" size="sm" onClick={() => setForm({ ...form, education: [...form.education, { school: "", degree: "", year: "" }] })}><Plus className="mr-1 h-3 w-3" /> Add education</Button>
+            </div>
+          </Card>
+
+          <Card title="Links">
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Website"><Input value={form.links.website ?? ""} onChange={(e) => setForm({ ...form, links: { ...form.links, website: e.target.value } })} placeholder="https://" /></Field>
+              <Field label="LinkedIn"><Input value={form.links.linkedin ?? ""} onChange={(e) => setForm({ ...form, links: { ...form.links, linkedin: e.target.value } })} placeholder="https://linkedin.com/in/…" /></Field>
+              <Field label="GitHub"><Input value={form.links.github ?? ""} onChange={(e) => setForm({ ...form, links: { ...form.links, github: e.target.value } })} placeholder="https://github.com/…" /></Field>
+              <Field label="Twitter / X"><Input value={form.links.twitter ?? ""} onChange={(e) => setForm({ ...form, links: { ...form.links, twitter: e.target.value } })} placeholder="https://x.com/…" /></Field>
+            </div>
+          </Card>
         </div>
       </div>
     </>
   );
+
+  function updateExp(i: number, patch: Partial<Experience>) {
+    setForm((f) => ({ ...f, experience: f.experience.map((x, k) => (k === i ? { ...x, ...patch } : x)) }));
+  }
+  function updateEdu(i: number, patch: Partial<Education>) {
+    setForm((f) => ({ ...f, education: f.education.map((x, k) => (k === i ? { ...x, ...patch } : x)) }));
+  }
+}
+
+function Card({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-6">
+      <h3 className="font-semibold">{title}</h3>
+      {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
+      <div className="mt-4">{children}</div>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return <div className="space-y-1.5"><Label className="text-xs">{label}</Label>{children}</div>;
 }

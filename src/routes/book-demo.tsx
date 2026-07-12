@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { toast } from "sonner";
 import { CheckCircle2, Calendar, Users, Building2, Loader2 } from "lucide-react";
@@ -11,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { sendDemoRequestEmails } from "@/lib/email.functions";
 
 export const Route = createFileRoute("/book-demo")({
   component: BookDemo,
@@ -34,10 +36,12 @@ const schema = z.object({
 
 function BookDemo() {
   const [submitted, setSubmitted] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<"sent" | "dev_fallback" | "failed" | null>(null);
   const [loading, setLoading] = useState(false);
   const [teamSize, setTeamSize] = useState<string | undefined>();
   const [hires, setHires] = useState<string | undefined>();
   const navigate = useNavigate();
+  const sendEmails = useServerFn(sendDemoRequestEmails);
   void navigate;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -57,7 +61,7 @@ function BookDemo() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.from("demo_requests").insert({
+    const payload = {
       first_name: parsed.data.first_name,
       last_name: parsed.data.last_name,
       email: parsed.data.email.toLowerCase(),
@@ -65,12 +69,22 @@ function BookDemo() {
       team_size: parsed.data.team_size ?? null,
       hires_per_year: parsed.data.hires_per_year ?? null,
       message: parsed.data.message || null,
-    });
-    setLoading(false);
+    };
+    const { error } = await supabase.from("demo_requests").insert(payload);
     if (error) {
+      setLoading(false);
       toast.error(error.message);
       return;
     }
+    // Fire emails in background — do not block success on delivery
+    try {
+      const res = await sendEmails({ data: payload });
+      const status = res.confirm.status === "sent" ? "sent" : res.confirm.status === "dev_fallback" ? "dev_fallback" : "failed";
+      setEmailStatus(status as "sent" | "dev_fallback" | "failed");
+    } catch {
+      setEmailStatus("failed");
+    }
+    setLoading(false);
     toast.success("Demo request received");
     setSubmitted(true);
   };
@@ -107,6 +121,15 @@ function BookDemo() {
               </div>
               <h2 className="mt-4 text-xl font-semibold">You're on the list</h2>
               <p className="mt-2 text-sm text-muted-foreground">We'll reach out within 24 hours to confirm your demo time.</p>
+              {emailStatus === "sent" && (
+                <p className="mt-3 text-xs text-success">Confirmation email sent — check your inbox.</p>
+              )}
+              {emailStatus === "dev_fallback" && (
+                <p className="mt-3 text-xs text-muted-foreground">Your request is saved. Email delivery is pending sender-domain verification; our team has been notified.</p>
+              )}
+              {emailStatus === "failed" && (
+                <p className="mt-3 text-xs text-warning-foreground">Your request is saved, but our email provider did not accept the message. Our team was still notified in the admin console.</p>
+              )}
               <Button asChild variant="outline" className="mt-6"><Link to="/">Back to home</Link></Button>
             </div>
           ) : (

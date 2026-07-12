@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { ArrowRight, Award, Handshake, School, Sparkles, Trophy, Users, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -12,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { sendPartnershipRequestEmails } from "@/lib/email.functions";
 
 export const Route = createFileRoute("/for-universities")({
   component: ForUniversities,
@@ -40,6 +42,8 @@ function ForUniversities() {
   const isUniversity = isAdmin || profile?.role === "university";
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<"sent" | "dev_fallback" | "failed" | null>(null);
+  const sendEmails = useServerFn(sendPartnershipRequestEmails);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -47,18 +51,28 @@ function ForUniversities() {
     const parsed = schema.safeParse(Object.fromEntries(fd));
     if (!parsed.success) return toast.error(parsed.error.issues[0]!.message);
     setLoading(true);
-    const { error } = await supabase.from("partnership_requests").insert({
-      kind: "university",
+    const payload = {
+      kind: "university" as const,
       organization: parsed.data.organization,
       contact_name: parsed.data.contact_name,
-      email: parsed.data.email,
+      email: parsed.data.email.toLowerCase(),
       role_title: parsed.data.role_title || null,
       country: parsed.data.country || null,
       students_or_hires: parsed.data.students_or_hires || null,
       message: parsed.data.message || null,
-    });
+    };
+    const { error } = await supabase.from("partnership_requests").insert(payload);
+    if (error) {
+      setLoading(false);
+      return toast.error(error.message);
+    }
+    try {
+      const res = await sendEmails({ data: payload });
+      setEmailStatus((res.confirm.status as "sent" | "dev_fallback" | "failed") ?? "failed");
+    } catch {
+      setEmailStatus("failed");
+    }
     setLoading(false);
-    if (error) return toast.error(error.message);
     setSent(true);
     toast.success("Request sent — our team will be in touch within 2 business days.");
   };
@@ -130,6 +144,9 @@ function ForUniversities() {
               </div>
               <h3 className="mt-4 text-xl font-semibold">Thanks — request received.</h3>
               <p className="mt-2 text-sm text-muted-foreground">Our partnerships team will reach out within 2 business days.</p>
+              {emailStatus === "sent" && <p className="mt-3 text-xs text-success">Confirmation email sent — check your inbox.</p>}
+              {emailStatus === "dev_fallback" && <p className="mt-3 text-xs text-muted-foreground">Your request is saved. Email delivery is pending sender-domain verification; our team has been notified.</p>}
+              {emailStatus === "failed" && <p className="mt-3 text-xs text-warning-foreground">Saved. Email provider did not accept the message; the team was still notified in the admin console.</p>}
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-border bg-card p-8">
