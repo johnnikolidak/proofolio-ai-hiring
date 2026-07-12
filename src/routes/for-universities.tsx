@@ -42,6 +42,8 @@ function ForUniversities() {
   const isUniversity = isAdmin || profile?.role === "university";
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<"sent" | "dev_fallback" | "failed" | null>(null);
+  const sendEmails = useServerFn(sendPartnershipRequestEmails);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -49,18 +51,28 @@ function ForUniversities() {
     const parsed = schema.safeParse(Object.fromEntries(fd));
     if (!parsed.success) return toast.error(parsed.error.issues[0]!.message);
     setLoading(true);
-    const { error } = await supabase.from("partnership_requests").insert({
-      kind: "university",
+    const payload = {
+      kind: "university" as const,
       organization: parsed.data.organization,
       contact_name: parsed.data.contact_name,
-      email: parsed.data.email,
+      email: parsed.data.email.toLowerCase(),
       role_title: parsed.data.role_title || null,
       country: parsed.data.country || null,
       students_or_hires: parsed.data.students_or_hires || null,
       message: parsed.data.message || null,
-    });
+    };
+    const { error } = await supabase.from("partnership_requests").insert(payload);
+    if (error) {
+      setLoading(false);
+      return toast.error(error.message);
+    }
+    try {
+      const res = await sendEmails({ data: payload });
+      setEmailStatus((res.confirm.status as "sent" | "dev_fallback" | "failed") ?? "failed");
+    } catch {
+      setEmailStatus("failed");
+    }
     setLoading(false);
-    if (error) return toast.error(error.message);
     setSent(true);
     toast.success("Request sent — our team will be in touch within 2 business days.");
   };
