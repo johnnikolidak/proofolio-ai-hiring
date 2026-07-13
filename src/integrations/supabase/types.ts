@@ -827,6 +827,20 @@ export type Database = {
         }
         Returns: boolean
       }
+      verify_certificate: {
+        Args: { _code: string }
+        Returns: {
+          candidate_id: string
+          holder_is_public: boolean
+          holder_name: string
+          id: string
+          issued_at: string
+          issuer: string
+          score: number
+          title: string
+          verification_code: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "candidate" | "company" | "university"
