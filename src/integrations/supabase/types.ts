@@ -96,6 +96,60 @@ export type Database = {
           },
         ]
       }
+      certificates: {
+        Row: {
+          candidate_id: string
+          challenge_id: string | null
+          created_at: string
+          id: string
+          issued_at: string
+          issuer: string
+          score: number | null
+          submission_id: string | null
+          title: string
+          verification_code: string
+        }
+        Insert: {
+          candidate_id: string
+          challenge_id?: string | null
+          created_at?: string
+          id?: string
+          issued_at?: string
+          issuer?: string
+          score?: number | null
+          submission_id?: string | null
+          title: string
+          verification_code?: string
+        }
+        Update: {
+          candidate_id?: string
+          challenge_id?: string | null
+          created_at?: string
+          id?: string
+          issued_at?: string
+          issuer?: string
+          score?: number | null
+          submission_id?: string | null
+          title?: string
+          verification_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificates_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificates_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenge_attempts: {
         Row: {
           candidate_id: string
@@ -263,6 +317,74 @@ export type Database = {
         }
         Relationships: []
       }
+      interview_sessions: {
+        Row: {
+          ai_summary: string | null
+          candidate_id: string
+          created_at: string
+          ended_at: string | null
+          id: string
+          role_target: string
+          score: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          candidate_id: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          role_target: string
+          score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          ai_summary?: string | null
+          candidate_id?: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          role_target?: string
+          score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      interview_turns: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          session_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          session_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_turns_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "interview_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           company_name: string
@@ -308,6 +430,101 @@ export type Database = {
           tags?: string[]
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      message_threads: {
+        Row: {
+          candidate_id: string
+          counterpart_id: string
+          created_at: string
+          id: string
+          last_message_at: string
+          subject: string | null
+        }
+        Insert: {
+          candidate_id: string
+          counterpart_id: string
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          subject?: string | null
+        }
+        Update: {
+          candidate_id?: string
+          counterpart_id?: string
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          subject?: string | null
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          sender_id: string
+          thread_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id: string
+          thread_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "message_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -364,6 +581,8 @@ export type Database = {
           company_name: string | null
           completion_pct: number
           created_at: string
+          cv_filename: string | null
+          cv_url: string | null
           education: Json
           email: string
           experience: Json
@@ -371,8 +590,10 @@ export type Database = {
           headline: string | null
           id: string
           is_public: boolean
+          languages: Json
           links: Json
           location: string | null
+          portfolio: Json
           preferred_roles: string[]
           role: Database["public"]["Enums"]["app_role"]
           skills: string[]
@@ -385,6 +606,8 @@ export type Database = {
           company_name?: string | null
           completion_pct?: number
           created_at?: string
+          cv_filename?: string | null
+          cv_url?: string | null
           education?: Json
           email: string
           experience?: Json
@@ -392,8 +615,10 @@ export type Database = {
           headline?: string | null
           id: string
           is_public?: boolean
+          languages?: Json
           links?: Json
           location?: string | null
+          portfolio?: Json
           preferred_roles?: string[]
           role?: Database["public"]["Enums"]["app_role"]
           skills?: string[]
@@ -406,6 +631,8 @@ export type Database = {
           company_name?: string | null
           completion_pct?: number
           created_at?: string
+          cv_filename?: string | null
+          cv_url?: string | null
           education?: Json
           email?: string
           experience?: Json
@@ -413,14 +640,45 @@ export type Database = {
           headline?: string | null
           id?: string
           is_public?: boolean
+          languages?: Json
           links?: Json
           location?: string | null
+          portfolio?: Json
           preferred_roles?: string[]
           role?: Database["public"]["Enums"]["app_role"]
           skills?: string[]
           updated_at?: string
         }
         Relationships: []
+      }
+      saved_jobs: {
+        Row: {
+          candidate_id: string
+          created_at: string
+          id: string
+          job_id: string
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string
+          id?: string
+          job_id: string
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string
+          id?: string
+          job_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_jobs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       submissions: {
         Row: {
@@ -496,6 +754,39 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          anonymized_benchmarking: boolean
+          created_at: string
+          notify_challenge_feedback: boolean
+          notify_interview_reminders: boolean
+          notify_new_jobs: boolean
+          notify_product_updates: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          anonymized_benchmarking?: boolean
+          created_at?: string
+          notify_challenge_feedback?: boolean
+          notify_interview_reminders?: boolean
+          notify_new_jobs?: boolean
+          notify_product_updates?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          anonymized_benchmarking?: boolean
+          created_at?: string
+          notify_challenge_feedback?: boolean
+          notify_interview_reminders?: boolean
+          notify_new_jobs?: boolean
+          notify_product_updates?: boolean
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
