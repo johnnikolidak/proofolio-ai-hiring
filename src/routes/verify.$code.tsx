@@ -10,25 +10,21 @@ export const Route = createFileRoute("/verify/$code")({
   head: ({ params }) => ({ meta: [{ title: `Verify certificate ${params.code} — Proofolio` }] }),
 });
 
-type Holder = { id: string; full_name: string | null; is_public: boolean };
-
 function Verify() {
   const { code } = Route.useParams();
   const q = useQuery({
     queryKey: ["verify", code],
     queryFn: async () => {
-      const { data: cert } = await supabase
-        .from("certificates")
-        .select("id,title,issuer,score,verification_code,issued_at,candidate_id")
-        .eq("verification_code", code)
-        .maybeSingle();
-      if (!cert) return null;
-      const { data: holder } = await supabase
-        .from("profiles")
-        .select("id,full_name,is_public")
-        .eq("id", cert.candidate_id)
-        .maybeSingle();
-      return { ...cert, holder: (holder as Holder | null) ?? null };
+      const { data, error } = await supabase.rpc("verify_certificate", { _code: code });
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : (data as any);
+      if (!row) return null;
+      return {
+        id: row.id, title: row.title, issuer: row.issuer, score: row.score,
+        verification_code: row.verification_code, issued_at: row.issued_at,
+        candidate_id: row.candidate_id,
+        holder: row.holder_name ? { id: row.candidate_id, full_name: row.holder_name, is_public: !!row.holder_is_public } : null,
+      };
     },
   });
 
