@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Loader2, Upload, X, Plus, ExternalLink, Trash2 } from "lucide-react";
+import { FileText, Loader2, Upload, X, Plus, ExternalLink, Trash2, Download } from "lucide-react";
 import { PageHeader } from "@/components/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,17 +20,29 @@ export const Route = createFileRoute("/candidate/profile")({ component: Profile 
 
 type Experience = { title: string; company: string; from: string; to: string; description?: string };
 type Education = { school: string; degree: string; year: string };
+type Language = { name: string; level: string };
+type PortfolioItem = { title: string; url: string; description?: string };
 type Links = { website?: string; linkedin?: string; github?: string; twitter?: string };
 
 const AVATAR_MAX_BYTES = 3 * 1024 * 1024;
 const AVATAR_MIME = ["image/png", "image/jpeg", "image/webp"];
+const CV_MAX_BYTES = 10 * 1024 * 1024;
+const CV_MIME = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
+const LANGUAGE_LEVELS = ["Basic", "Conversational", "Fluent", "Native"];
 
 function Profile() {
   const { user, refreshProfile } = useAuth();
   const qc = useQueryClient();
   const [avatarUploading, setAvatarUploading] = useState(false);
+  const [cvUploading, setCvUploading] = useState(false);
   const [signedAvatar, setSignedAvatar] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [signedCv, setSignedCv] = useState<string | null>(null);
+  const avatarRef = useRef<HTMLInputElement>(null);
+  const cvRef = useRef<HTMLInputElement>(null);
 
   const profileQ = useQuery({
     enabled: !!user?.id,
@@ -42,7 +54,6 @@ function Profile() {
     },
   });
 
-  // form state derived from server value
   const [form, setForm] = useState({
     full_name: "",
     headline: "",
@@ -54,6 +65,8 @@ function Profile() {
     preferred_roles: [] as string[],
     education: [] as Education[],
     experience: [] as Experience[],
+    languages: [] as Language[],
+    portfolio: [] as PortfolioItem[],
     links: {} as Links,
   });
   const [skillDraft, setSkillDraft] = useState("");
@@ -71,23 +84,33 @@ function Profile() {
       is_public: p.is_public ?? false,
       skills: (p.skills as string[]) ?? [],
       preferred_roles: (p.preferred_roles as string[]) ?? [],
-      education: ((p.education as unknown as Education[]) ?? []),
-      experience: ((p.experience as unknown as Experience[]) ?? []),
-      links: ((p.links as unknown as Links) ?? {}),
+      education: (p.education as unknown as Education[]) ?? [],
+      experience: (p.experience as unknown as Experience[]) ?? [],
+      languages: (p.languages as unknown as Language[]) ?? [],
+      portfolio: (p.portfolio as unknown as PortfolioItem[]) ?? [],
+      links: (p.links as unknown as Links) ?? {},
     });
   }, [profileQ.data]);
 
-  // Sign avatar URL if present (private bucket)
   useEffect(() => {
     const path = profileQ.data?.avatar_url;
     if (!path) { setSignedAvatar(null); return; }
     let cancelled = false;
-    (async () => {
-      const { data } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60);
+    supabase.storage.from("avatars").createSignedUrl(path, 60 * 60).then(({ data }) => {
       if (!cancelled) setSignedAvatar(data?.signedUrl ?? null);
-    })();
+    });
     return () => { cancelled = true; };
   }, [profileQ.data?.avatar_url]);
+
+  useEffect(() => {
+    const path = profileQ.data?.cv_url;
+    if (!path) { setSignedCv(null); return; }
+    let cancelled = false;
+    supabase.storage.from("cvs").createSignedUrl(path, 60 * 60).then(({ data }) => {
+      if (!cancelled) setSignedCv(data?.signedUrl ?? null);
+    });
+    return () => { cancelled = true; };
+  }, [profileQ.data?.cv_url]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -100,9 +123,16 @@ function Profile() {
         is_public: z.boolean(),
         skills: z.array(z.string().trim().min(1).max(40)).max(50),
         preferred_roles: z.array(z.string().trim().min(1).max(60)).max(20),
-        education: z.array(z.object({ school: z.string(), degree: z.string(), year: z.string() })),
-        experience: z.array(z.object({ title: z.string(), company: z.string(), from: z.string(), to: z.string(), description: z.string().optional() })),
-        links: z.object({ website: z.string().url().optional().or(z.literal("")), linkedin: z.string().url().optional().or(z.literal("")), github: z.string().url().optional().or(z.literal("")), twitter: z.string().url().optional().or(z.literal("")) }).partial(),
+        education: z.array(z.object({ school: z.string().max(120), degree: z.string().max(120), year: z.string().max(20) })),
+        experience: z.array(z.object({ title: z.string().max(120), company: z.string().max(120), from: z.string().max(30), to: z.string().max(30), description: z.string().max(1000).optional() })),
+        languages: z.array(z.object({ name: z.string().min(1).max(60), level: z.string().min(1).max(30) })).max(20),
+        portfolio: z.array(z.object({ title: z.string().min(1).max(120), url: z.string().url(), description: z.string().max(400).optional() })).max(20),
+        links: z.object({
+          website: z.string().url().optional().or(z.literal("")),
+          linkedin: z.string().url().optional().or(z.literal("")),
+          github: z.string().url().optional().or(z.literal("")),
+          twitter: z.string().url().optional().or(z.literal("")),
+        }).partial(),
       }).parse(form);
       const { error } = await supabase.from("profiles").update({
         full_name: validated.full_name || null,
@@ -115,6 +145,8 @@ function Profile() {
         preferred_roles: validated.preferred_roles,
         education: validated.education as never,
         experience: validated.experience as never,
+        languages: validated.languages as never,
+        portfolio: validated.portfolio as never,
         links: validated.links as never,
       }).eq("id", user!.id);
       if (error) throw error;
@@ -135,7 +167,6 @@ function Profile() {
     const path = `${user!.id}/avatar-${Date.now()}.${ext}`;
     const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
     if (upErr) { setAvatarUploading(false); toast.error(upErr.message); return; }
-    // Remove old
     if (profileQ.data?.avatar_url && profileQ.data.avatar_url !== path) {
       await supabase.storage.from("avatars").remove([profileQ.data.avatar_url]);
     }
@@ -154,6 +185,32 @@ function Profile() {
     toast.success("Photo removed");
     await qc.invalidateQueries({ queryKey: ["candidate", "profile"] });
     await refreshProfile();
+  };
+
+  const handleCv = async (file: File) => {
+    if (!CV_MIME.includes(file.type)) { toast.error("Upload a PDF or Word document"); return; }
+    if (file.size > CV_MAX_BYTES) { toast.error("File must be under 10 MB"); return; }
+    setCvUploading(true);
+    const ext = file.name.split(".").pop() ?? "pdf";
+    const path = `${user!.id}/cv-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("cvs").upload(path, file, { upsert: true, contentType: file.type });
+    if (upErr) { setCvUploading(false); toast.error(upErr.message); return; }
+    if (profileQ.data?.cv_url && profileQ.data.cv_url !== path) {
+      await supabase.storage.from("cvs").remove([profileQ.data.cv_url]);
+    }
+    const { error: pErr } = await supabase.from("profiles").update({ cv_url: path, cv_filename: file.name }).eq("id", user!.id);
+    setCvUploading(false);
+    if (pErr) { toast.error(pErr.message); return; }
+    toast.success("CV uploaded");
+    await qc.invalidateQueries({ queryKey: ["candidate", "profile"] });
+  };
+
+  const removeCv = async () => {
+    if (!profileQ.data?.cv_url) return;
+    await supabase.storage.from("cvs").remove([profileQ.data.cv_url]);
+    await supabase.from("profiles").update({ cv_url: null, cv_filename: null }).eq("id", user!.id);
+    toast.success("CV removed");
+    await qc.invalidateQueries({ queryKey: ["candidate", "profile"] });
   };
 
   if (profileQ.isLoading) return <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
@@ -201,9 +258,9 @@ function Profile() {
             </Avatar>
             <div className="mt-4 font-semibold">{form.full_name || "Add your name"}</div>
             <div className="text-xs text-muted-foreground">{form.headline || "Add a headline"}</div>
-            <input ref={fileRef} type="file" accept={AVATAR_MIME.join(",")} className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatar(f); e.target.value = ""; }} />
+            <input ref={avatarRef} type="file" accept={AVATAR_MIME.join(",")} className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleAvatar(f); e.target.value = ""; }} />
             <div className="mt-4 flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1" onClick={() => fileRef.current?.click()} disabled={avatarUploading}>
+              <Button variant="outline" size="sm" className="flex-1" onClick={() => avatarRef.current?.click()} disabled={avatarUploading}>
                 {avatarUploading ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : <Upload className="mr-1.5 h-3 w-3" />}
                 {p.avatar_url ? "Replace" : "Upload"}
               </Button>
@@ -223,6 +280,27 @@ function Profile() {
               </div>
               <Switch checked={form.is_public} onCheckedChange={(v) => setForm({ ...form, is_public: v })} />
             </div>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-6">
+            <div className="mb-2 flex items-center gap-2">
+              <FileText className="h-4 w-4 text-primary" />
+              <div className="text-sm font-medium">CV / Resume</div>
+            </div>
+            <input ref={cvRef} type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleCv(f); e.target.value = ""; }} />
+            {p.cv_url ? (
+              <div className="space-y-2">
+                <div className="truncate rounded-lg border border-border bg-secondary/40 px-3 py-2 text-xs">{p.cv_filename || "cv.pdf"}</div>
+                <div className="flex gap-2">
+                  {signedCv && <Button asChild size="sm" variant="outline" className="flex-1"><a href={signedCv} target="_blank" rel="noreferrer"><Download className="mr-1.5 h-3 w-3" />View</a></Button>}
+                  <Button size="sm" variant="outline" onClick={() => cvRef.current?.click()} disabled={cvUploading}>{cvUploading ? <Loader2 className="h-3 w-3 animate-spin" /> : "Replace"}</Button>
+                  <Button size="sm" variant="ghost" onClick={removeCv}><Trash2 className="h-3 w-3" /></Button>
+                </div>
+              </div>
+            ) : (
+              <Button size="sm" variant="outline" className="w-full" onClick={() => cvRef.current?.click()} disabled={cvUploading}>
+                {cvUploading ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : <Upload className="mr-1.5 h-3 w-3" />}Upload PDF or Word
+              </Button>
+            )}
           </div>
         </div>
 
@@ -297,6 +375,40 @@ function Profile() {
             </div>
           </Card>
 
+          <Card title="Languages">
+            <div className="space-y-3">
+              {form.languages.map((x, i) => (
+                <div key={i} className="grid gap-2 rounded-lg border border-border p-3 md:grid-cols-[1fr_200px_auto]">
+                  <Input value={x.name} onChange={(e) => updateLang(i, { name: e.target.value })} placeholder="Language" />
+                  <select
+                    value={x.level}
+                    onChange={(e) => updateLang(i, { level: e.target.value })}
+                    className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="">Level…</option>
+                    {LANGUAGE_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                  <Button size="sm" variant="ghost" onClick={() => setForm({ ...form, languages: form.languages.filter((_, k) => k !== i) })}><Trash2 className="h-3 w-3" /></Button>
+                </div>
+              ))}
+              <Button variant="outline" size="sm" onClick={() => setForm({ ...form, languages: [...form.languages, { name: "", level: "" }] })}><Plus className="mr-1 h-3 w-3" /> Add language</Button>
+            </div>
+          </Card>
+
+          <Card title="Portfolio">
+            <div className="space-y-3">
+              {form.portfolio.map((x, i) => (
+                <div key={i} className="grid gap-2 rounded-lg border border-border p-3 md:grid-cols-2">
+                  <Input value={x.title} onChange={(e) => updatePort(i, { title: e.target.value })} placeholder="Title" />
+                  <Input value={x.url} onChange={(e) => updatePort(i, { url: e.target.value })} placeholder="https://…" />
+                  <div className="md:col-span-2"><Textarea rows={2} value={x.description ?? ""} onChange={(e) => updatePort(i, { description: e.target.value })} placeholder="Short description" /></div>
+                  <div className="md:col-span-2 flex justify-end"><Button size="sm" variant="ghost" onClick={() => setForm({ ...form, portfolio: form.portfolio.filter((_, k) => k !== i) })}><Trash2 className="h-3 w-3" /></Button></div>
+                </div>
+              ))}
+              <Button variant="outline" size="sm" onClick={() => setForm({ ...form, portfolio: [...form.portfolio, { title: "", url: "" }] })}><Plus className="mr-1 h-3 w-3" /> Add portfolio item</Button>
+            </div>
+          </Card>
+
           <Card title="Links">
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Website"><Input value={form.links.website ?? ""} onChange={(e) => setForm({ ...form, links: { ...form.links, website: e.target.value } })} placeholder="https://" /></Field>
@@ -315,6 +427,12 @@ function Profile() {
   }
   function updateEdu(i: number, patch: Partial<Education>) {
     setForm((f) => ({ ...f, education: f.education.map((x, k) => (k === i ? { ...x, ...patch } : x)) }));
+  }
+  function updateLang(i: number, patch: Partial<Language>) {
+    setForm((f) => ({ ...f, languages: f.languages.map((x, k) => (k === i ? { ...x, ...patch } : x)) }));
+  }
+  function updatePort(i: number, patch: Partial<PortfolioItem>) {
+    setForm((f) => ({ ...f, portfolio: f.portfolio.map((x, k) => (k === i ? { ...x, ...patch } : x)) }));
   }
 }
 
