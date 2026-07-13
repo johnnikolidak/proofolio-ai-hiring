@@ -22,7 +22,7 @@ function Library() {
       const { data, error } = await supabase
         .from("challenges")
         .select("id,title,role,status,difficulty,duration_hours,created_at")
-        .eq("created_by", user!.id)
+        .eq("owner_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];

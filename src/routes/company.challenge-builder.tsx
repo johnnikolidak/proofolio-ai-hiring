@@ -33,14 +33,14 @@ function Builder() {
       const { data, error } = await supabase.from("challenges").insert({
         title: title.trim(),
         role: role.trim() || null,
-        difficulty,
+        difficulty: difficulty.toLowerCase(),
         duration_hours: Number(duration) || null,
         context: context.trim() || null,
         task: task.trim() || null,
         deliverables: deliverables.trim() || null,
         evaluation_criteria: criteria.trim() || null,
         status,
-        created_by: user.id,
+        owner_id: user.id,
       }).select("id").single();
       if (error) throw error;
       return data;

@@ -14,15 +14,20 @@ function Analytics() {
     enabled: !!user?.id,
     queryKey: ["company", "analytics", user?.id],
     queryFn: async () => {
-      const [jobs, apps, chals] = await Promise.all([
-        supabase.from("jobs").select("id,status", { count: "exact" }).eq("company_id", user!.id),
-        supabase.from("applications").select("id,status,job:jobs!inner(company_id)", { count: "exact" }).eq("job.company_id", user!.id),
-        supabase.from("challenges").select("id,status", { count: "exact" }).eq("created_by", user!.id),
+      const [jobs, chals] = await Promise.all([
+        supabase.from("jobs").select("id,status").eq("owner_id", user!.id),
+        supabase.from("challenges").select("id,status").eq("owner_id", user!.id),
       ]);
+      const jobIds = (jobs.data ?? []).map((j) => j.id);
+      let appsCount = 0;
+      if (jobIds.length) {
+        const { count } = await supabase.from("applications").select("id", { count: "exact", head: true }).in("job_id", jobIds);
+        appsCount = count ?? 0;
+      }
       return {
         jobs: jobs.data ?? [],
-        applications: apps.data ?? [],
         challenges: chals.data ?? [],
+        appsCount,
       };
     },
   });
@@ -30,9 +35,9 @@ function Analytics() {
   if (q.isLoading) return <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 
   const jobsCount = q.data?.jobs.length ?? 0;
-  const appsCount = q.data?.applications.length ?? 0;
   const chalsCount = q.data?.challenges.length ?? 0;
   const activeJobs = q.data?.jobs.filter((j) => j.status === "published").length ?? 0;
+  const appsCount = q.data?.appsCount ?? 0;
 
   const noData = jobsCount === 0 && appsCount === 0 && chalsCount === 0;
 

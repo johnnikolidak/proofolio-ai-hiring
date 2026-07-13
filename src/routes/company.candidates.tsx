@@ -12,19 +12,50 @@ import { formatDistanceToNow } from "date-fns";
 
 export const Route = createFileRoute("/company/candidates")({ component: Candidates });
 
+type ApplicantRow = {
+  id: string;
+  status: string;
+  created_at: string;
+  candidate_id: string;
+  job: { id: string; title: string } | null;
+  candidate_name: string;
+  candidate_headline: string | null;
+};
+
 function Candidates() {
   const { user } = useAuth();
   const q = useQuery({
     enabled: !!user?.id,
     queryKey: ["company", "applicants", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
+    queryFn: async (): Promise<ApplicantRow[]> => {
+      const { data: jobs } = await supabase.from("jobs").select("id,title").eq("owner_id", user!.id);
+      const jobIds = (jobs ?? []).map((j) => j.id);
+      if (jobIds.length === 0) return [];
+      const { data: apps, error } = await supabase
         .from("applications")
-        .select("id,status,created_at,cover_note,job:jobs!inner(id,title,company_id),candidate:profiles(id,full_name,headline,avatar_url)")
-        .eq("job.company_id", user!.id)
+        .select("id,status,created_at,candidate_id,job_id")
+        .in("job_id", jobIds)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data ?? [];
+      const candidateIds = Array.from(new Set((apps ?? []).map((a) => a.candidate_id)));
+      const { data: profiles } = candidateIds.length
+        ? await supabase.from("profiles").select("id,full_name,headline").in("id", candidateIds)
+        : { data: [] as { id: string; full_name: string | null; headline: string | null }[] };
+      const jobsById = new Map((jobs ?? []).map((j) => [j.id, j] as const));
+      const profById = new Map((profiles ?? []).map((p) => [p.id, p] as const));
+      return (apps ?? []).map((a) => {
+        const j = jobsById.get(a.job_id);
+        const p = profById.get(a.candidate_id);
+        return {
+          id: a.id,
+          status: a.status,
+          created_at: a.created_at,
+          candidate_id: a.candidate_id,
+          job: j ? { id: j.id, title: j.title } : null,
+          candidate_name: p?.full_name ?? "Candidate",
+          candidate_headline: p?.headline ?? null,
+        };
+      });
     },
   });
 
@@ -43,25 +74,22 @@ function Candidates() {
       ) : (
         <div className="grid gap-3">
           {q.data!.map((a) => {
-            const name = a.candidate?.full_name ?? "Candidate";
-            const initials = name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
+            const initials = a.candidate_name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
             return (
               <div key={a.id} className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4">
                 <Avatar className="h-11 w-11">
                   <AvatarFallback className="bg-primary-soft text-primary text-xs font-semibold">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <div className="font-medium">{name}</div>
+                  <div className="font-medium">{a.candidate_name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {a.candidate?.headline ?? "—"} · Applied to {a.job?.title} · {formatDistanceToNow(new Date(a.created_at), { addSuffix: true })}
+                    {a.candidate_headline ?? "—"} · Applied to {a.job?.title ?? "job"} · {formatDistanceToNow(new Date(a.created_at), { addSuffix: true })}
                   </div>
                 </div>
                 <Badge variant="secondary" className="rounded-full capitalize">{a.status}</Badge>
-                {a.candidate?.id && (
-                  <Button asChild size="sm" variant="outline">
-                    <Link to="/p/$id" params={{ id: a.candidate.id }}>View profile</Link>
-                  </Button>
-                )}
+                <Button asChild size="sm" variant="outline">
+                  <Link to="/p/$id" params={{ id: a.candidate_id }}>View profile</Link>
+                </Button>
               </div>
             );
           })}

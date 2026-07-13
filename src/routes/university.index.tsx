@@ -16,14 +16,8 @@ function Overview() {
     enabled: !!user?.id,
     queryKey: ["university", "overview", user?.id],
     queryFn: async () => {
-      const [chals, partners] = await Promise.all([
-        supabase.from("challenges").select("id,status", { count: "exact" }).eq("created_by", user!.id),
-        supabase.from("partnership_requests").select("id,status", { count: "exact" }).eq("submitted_by", user!.id),
-      ]);
-      return {
-        challenges: chals.data ?? [],
-        partners: partners.data ?? [],
-      };
+      const chals = await supabase.from("challenges").select("id,status").eq("owner_id", user!.id);
+      return { challenges: chals.data ?? [] };
     },
   });
 
@@ -31,7 +25,6 @@ function Overview() {
 
   const activeChallenges = q.data?.challenges.filter((c) => c.status === "published").length ?? 0;
   const totalChallenges = q.data?.challenges.length ?? 0;
-  const totalPartners = q.data?.partners.length ?? 0;
 
   return (
     <>
@@ -42,8 +35,8 @@ function Overview() {
       />
       <div className="grid gap-4 md:grid-cols-3">
         <Stat label="Active campus challenges" value={activeChallenges} sub={`${totalChallenges} total`} Icon={Target} />
-        <Stat label="Employer partnership requests" value={totalPartners} Icon={Handshake} />
-        <Stat label="Verified certificates issued" value={0} sub="Coming soon" Icon={Award} />
+        <Stat label="Employer partnerships" value={0} sub="Managed by Proofolio" Icon={Handshake} />
+        <Stat label="Verified certificates" value={0} sub="Coming soon" Icon={Award} />
       </div>
     </>
   );
