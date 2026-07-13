@@ -58,7 +58,7 @@ function Settings() {
       }).eq("id", user!.id);
       if (error) throw error;
     },
-    onSuccess: async () => { toast.success("Saved"); await refresh(); qc.invalidateQueries(); },
+    onSuccess: async () => { toast.success("Saved"); await refreshProfile(); await profileQ.refetch(); qc.invalidateQueries(); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -76,7 +76,7 @@ function Settings() {
       if (error) throw error;
       setAvatarUrl(url);
     },
-    onSuccess: async () => { toast.success("Logo updated"); await refresh(); },
+    onSuccess: async () => { toast.success("Logo updated"); await refreshProfile(); await profileQ.refetch(); },
     onError: (e: Error) => toast.error(e.message),
   });
 
