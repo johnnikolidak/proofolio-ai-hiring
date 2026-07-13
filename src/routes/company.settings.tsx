@@ -18,8 +18,18 @@ export const Route = createFileRoute("/company/settings")({
 });
 
 function Settings() {
-  const { user, profile, refresh } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const qc = useQueryClient();
+  const profileQ = useQuery({
+    enabled: !!user?.id,
+    queryKey: ["company", "profile-full", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("profiles").select("id,email,full_name,company_name,headline,bio,avatar_url").eq("id", user!.id).single();
+      if (error) throw error;
+      return data;
+    },
+  });
+  const profile = profileQ.data;
   const [company, setCompany] = useState("");
   const [fullName, setFullName] = useState("");
   const [headline, setHeadline] = useState("");
