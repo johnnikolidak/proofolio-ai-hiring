@@ -67,7 +67,13 @@ function Settings() {
       anonymized_benchmarking: settingsQ.data.anonymized_benchmarking,
     });
   }, [settingsQ.data]);
-  useEffect(() => { if (profile) { setPublicProfile(profile.is_public ?? false); setEmail(profile.email); } }, [profile]);
+  useEffect(() => { if (profile) setEmail(profile.email); }, [profile]);
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.from("profiles").select("is_public").eq("id", user.id).single().then(({ data }) => {
+      if (data) setPublicProfile(data.is_public ?? false);
+    });
+  }, [user?.id]);
 
   const saveAccount = useMutation({
     mutationFn: async () => {

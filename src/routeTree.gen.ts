@@ -22,6 +22,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UniversityIndexRouteImport } from './routes/university.index'
 import { Route as CompanyIndexRouteImport } from './routes/company.index'
 import { Route as CandidateIndexRouteImport } from './routes/candidate.index'
+import { Route as VerifyCodeRouteImport } from './routes/verify.$code'
 import { Route as UniversityStudentsRouteImport } from './routes/university.students'
 import { Route as UniversitySettingsRouteImport } from './routes/university.settings'
 import { Route as UniversityPartnershipsRouteImport } from './routes/university.partnerships'
@@ -127,6 +128,11 @@ const CandidateIndexRoute = CandidateIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CandidateRoute,
+} as any)
+const VerifyCodeRoute = VerifyCodeRouteImport.update({
+  id: '/verify/$code',
+  path: '/verify/$code',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const UniversityStudentsRoute = UniversityStudentsRouteImport.update({
   id: '/students',
@@ -378,6 +384,7 @@ export interface FileRoutesByFullPath {
   '/university/partnerships': typeof UniversityPartnershipsRoute
   '/university/settings': typeof UniversitySettingsRoute
   '/university/students': typeof UniversityStudentsRoute
+  '/verify/$code': typeof VerifyCodeRoute
   '/candidate/': typeof CandidateIndexRoute
   '/company/': typeof CompanyIndexRoute
   '/university/': typeof UniversityIndexRoute
@@ -430,6 +437,7 @@ export interface FileRoutesByTo {
   '/university/partnerships': typeof UniversityPartnershipsRoute
   '/university/settings': typeof UniversitySettingsRoute
   '/university/students': typeof UniversityStudentsRoute
+  '/verify/$code': typeof VerifyCodeRoute
   '/candidate': typeof CandidateIndexRoute
   '/company': typeof CompanyIndexRoute
   '/university': typeof UniversityIndexRoute
@@ -486,6 +494,7 @@ export interface FileRoutesById {
   '/university/partnerships': typeof UniversityPartnershipsRoute
   '/university/settings': typeof UniversitySettingsRoute
   '/university/students': typeof UniversityStudentsRoute
+  '/verify/$code': typeof VerifyCodeRoute
   '/candidate/': typeof CandidateIndexRoute
   '/company/': typeof CompanyIndexRoute
   '/university/': typeof UniversityIndexRoute
@@ -543,6 +552,7 @@ export interface FileRouteTypes {
     | '/university/partnerships'
     | '/university/settings'
     | '/university/students'
+    | '/verify/$code'
     | '/candidate/'
     | '/company/'
     | '/university/'
@@ -595,6 +605,7 @@ export interface FileRouteTypes {
     | '/university/partnerships'
     | '/university/settings'
     | '/university/students'
+    | '/verify/$code'
     | '/candidate'
     | '/company'
     | '/university'
@@ -650,6 +661,7 @@ export interface FileRouteTypes {
     | '/university/partnerships'
     | '/university/settings'
     | '/university/students'
+    | '/verify/$code'
     | '/candidate/'
     | '/company/'
     | '/university/'
@@ -674,6 +686,7 @@ export interface RootRouteChildren {
   AuthSignupRoute: typeof AuthSignupRoute
   AuthVerifyEmailRoute: typeof AuthVerifyEmailRoute
   PIdRoute: typeof PIdRoute
+  VerifyCodeRoute: typeof VerifyCodeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -768,6 +781,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/candidate/'
       preLoaderRoute: typeof CandidateIndexRouteImport
       parentRoute: typeof CandidateRoute
+    }
+    '/verify/$code': {
+      id: '/verify/$code'
+      path: '/verify/$code'
+      fullPath: '/verify/$code'
+      preLoaderRoute: typeof VerifyCodeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/university/students': {
       id: '/university/students'
@@ -1191,6 +1211,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthSignupRoute: AuthSignupRoute,
   AuthVerifyEmailRoute: AuthVerifyEmailRoute,
   PIdRoute: PIdRoute,
+  VerifyCodeRoute: VerifyCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

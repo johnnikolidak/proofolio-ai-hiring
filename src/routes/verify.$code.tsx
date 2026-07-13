@@ -10,17 +10,25 @@ export const Route = createFileRoute("/verify/$code")({
   head: ({ params }) => ({ meta: [{ title: `Verify certificate ${params.code} — Proofolio` }] }),
 });
 
+type Holder = { id: string; full_name: string | null; is_public: boolean };
+
 function Verify() {
   const { code } = Route.useParams();
   const q = useQuery({
     queryKey: ["verify", code],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: cert } = await supabase
         .from("certificates")
-        .select("id,title,issuer,score,verification_code,issued_at,candidate_id,profiles!inner(full_name,is_public,id)")
+        .select("id,title,issuer,score,verification_code,issued_at,candidate_id")
         .eq("verification_code", code)
         .maybeSingle();
-      return data;
+      if (!cert) return null;
+      const { data: holder } = await supabase
+        .from("profiles")
+        .select("id,full_name,is_public")
+        .eq("id", cert.candidate_id)
+        .maybeSingle();
+      return { ...cert, holder: (holder as Holder | null) ?? null };
     },
   });
 
@@ -35,13 +43,13 @@ function Verify() {
             <div className="mt-4 grid h-12 w-12 place-items-center rounded-xl bg-primary text-primary-foreground"><Award className="h-6 w-6" /></div>
             <h1 className="mt-4 text-2xl font-semibold">{q.data.title}</h1>
             <p className="mt-1 text-sm text-muted-foreground">Issued by {q.data.issuer} on {format(new Date(q.data.issued_at), "MMMM d, yyyy")}</p>
-            {q.data.profiles?.full_name && (
+            {q.data.holder?.full_name && (
               <div className="mt-6 rounded-lg border border-border p-4">
                 <div className="text-xs uppercase tracking-wider text-muted-foreground">Awarded to</div>
-                <div className="mt-1 font-semibold">{q.data.profiles.full_name}</div>
-                {q.data.profiles.is_public && (
+                <div className="mt-1 font-semibold">{q.data.holder.full_name}</div>
+                {q.data.holder.is_public && (
                   <Button asChild size="sm" variant="link" className="mt-1 px-0">
-                    <Link to="/p/$id" params={{ id: q.data.profiles.id }}>View public profile →</Link>
+                    <Link to="/p/$id" params={{ id: q.data.holder.id }}>View public profile →</Link>
                   </Button>
                 )}
               </div>
