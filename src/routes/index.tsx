@@ -13,8 +13,8 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "Proofolio — Hire on proof of skill, not a résumé" },
       { name: "description", content: "Proofolio is the skills platform for candidates, companies and universities. Real business challenges. AI-scored evidence. Verified proof profiles." },
-      { property: "og:title", content: "Proofolio — Hire on proof of skill" },
-      { property: "og:description", content: "One platform. Three experiences. Candidates prove skills. Companies hire on evidence. Universities connect students to employers." },
+      { property: "og:title", content: "Proofolio — Hire on proof of skill, not a résumé" },
+      { property: "og:description", content: "Proofolio is the skills platform for candidates, companies and universities. Real business challenges. AI-scored evidence. Verified proof profiles." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
