@@ -1,99 +1,82 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/use-auth";
+import { Slider } from "@/components/ui/slider";
+import { Sparkles, Wand2 } from "lucide-react";
 
 export const Route = createFileRoute("/company/challenge-builder")({ component: Builder });
 
+const templates = ["Growth analyst case", "SQL analytics", "Product spec", "Landing page", "Financial model", "Brand story"];
+
 function Builder() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [title, setTitle] = useState("");
-  const [role, setRole] = useState("");
-  const [difficulty, setDifficulty] = useState("Intermediate");
-  const [duration, setDuration] = useState("3");
-  const [context, setContext] = useState("");
-  const [task, setTask] = useState("");
-  const [deliverables, setDeliverables] = useState("");
-  const [criteria, setCriteria] = useState("");
-
-  const save = useMutation({
-    mutationFn: async (status: "draft" | "published") => {
-      if (!user?.id) throw new Error("Not signed in");
-      if (!title.trim()) throw new Error("Add a title");
-      const { data, error } = await supabase.from("challenges").insert({
-        title: title.trim(),
-        role: role.trim() || null,
-        difficulty: difficulty.toLowerCase(),
-        duration_hours: Number(duration) || null,
-        context: context.trim() || null,
-        task: task.trim() || null,
-        deliverables: deliverables.trim() || null,
-        evaluation_criteria: criteria.trim() || null,
-        status,
-        owner_id: user.id,
-      }).select("id").single();
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (_data, status) => {
-      toast.success(status === "published" ? "Challenge published" : "Draft saved");
-      navigate({ to: "/company/library" });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   return (
     <>
       <PageHeader
         title="Challenge Builder"
-        description="Create a real-work challenge candidates can complete and submit."
-        actions={
-          <>
-            <Button variant="outline" onClick={() => save.mutate("draft")} disabled={save.isPending}>
-              {save.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save draft
-            </Button>
-            <Button onClick={() => save.mutate("published")} disabled={save.isPending}>
-              {save.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Publish
-            </Button>
-          </>
-        }
+        description="Design your challenge with AI. Ship in minutes."
+        actions={<><Button variant="outline"><Wand2 className="mr-1 h-4 w-4" />AI draft</Button><Button>Publish</Button></>}
       />
-      <div className="max-w-3xl space-y-6">
-        <div className="rounded-xl border border-border bg-card p-6">
-          <h3 className="font-semibold">Basics</h3>
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <div className="space-y-1.5 md:col-span-2"><Label>Title *</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Growth Analyst — Q3 case" /></div>
-            <div className="space-y-1.5"><Label>Role</Label><Input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Junior Growth Analyst" /></div>
-            <div className="space-y-1.5"><Label>Difficulty</Label>
-              <Select value={difficulty} onValueChange={setDifficulty}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+        <div className="space-y-6">
+          <div className="rounded-xl border border-border bg-card p-6">
+            <h3 className="font-semibold">Basics</h3>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div className="space-y-1.5"><Label>Title</Label><Input defaultValue="Growth Analyst — Q3 case" /></div>
+              <div className="space-y-1.5"><Label>Role</Label><Input defaultValue="Junior Growth Analyst" /></div>
+              <div className="space-y-1.5"><Label>Time budget</Label><Select defaultValue="3"><SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{["1", "2", "3", "4", "6"].map((h) => <SelectItem key={h} value={h}>{h} hours</SelectItem>)}</SelectContent>
+              </Select></div>
+              <div className="space-y-1.5"><Label>Difficulty</Label><Select defaultValue="Intermediate"><SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{["Beginner", "Intermediate", "Advanced"].map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
-              </Select>
+              </Select></div>
+              <div className="md:col-span-2 space-y-1.5"><Label>Brief</Label>
+                <Textarea rows={5} defaultValue="Northwind is launching a new self-serve tier. Analyze the funnel data and recommend the top 3 conversion improvements. Include reasoning, impact estimates, and next experiments." />
+              </div>
             </div>
-            <div className="space-y-1.5"><Label>Time budget (hours)</Label>
-              <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{["1", "2", "3", "4", "6", "8"].map((h) => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
-              </Select>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-6">
+            <h3 className="font-semibold">Rubric</h3>
+            <div className="mt-4 space-y-4">
+              {[
+                { name: "Analytical depth", weight: 35 },
+                { name: "Structured thinking", weight: 25 },
+                { name: "Business impact", weight: 25 },
+                { name: "Communication", weight: 15 },
+              ].map((r) => (
+                <div key={r.name}>
+                  <div className="flex justify-between text-sm">
+                    <span>{r.name}</span>
+                    <span className="text-muted-foreground">{r.weight}%</span>
+                  </div>
+                  <Slider defaultValue={[r.weight]} max={100} className="mt-2" />
+                </div>
+              ))}
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-card p-6 space-y-4">
-          <h3 className="font-semibold">Brief</h3>
-          <div className="space-y-1.5"><Label>Context</Label><Textarea rows={4} value={context} onChange={(e) => setContext(e.target.value)} placeholder="Background the candidate needs to know." /></div>
-          <div className="space-y-1.5"><Label>Task</Label><Textarea rows={4} value={task} onChange={(e) => setTask(e.target.value)} placeholder="What the candidate should do." /></div>
-          <div className="space-y-1.5"><Label>Deliverables</Label><Textarea rows={3} value={deliverables} onChange={(e) => setDeliverables(e.target.value)} placeholder="Exact outputs to submit." /></div>
-          <div className="space-y-1.5"><Label>How you'll evaluate</Label><Textarea rows={3} value={criteria} onChange={(e) => setCriteria(e.target.value)} placeholder="Rubric or key criteria." /></div>
+        <div className="space-y-5">
+          <div className="rounded-xl border border-border bg-primary-soft p-5">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <h3 className="mt-3 font-semibold">AI suggestions</h3>
+            <ul className="mt-3 space-y-2 text-sm">
+              <li>· Add a bias-check step to the rubric.</li>
+              <li>· Consider a 30-min interview follow-up.</li>
+              <li>· Include a sample dataset for realism.</li>
+            </ul>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-5">
+            <h3 className="font-semibold">Templates</h3>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {templates.map((t) => (
+                <Badge key={t} variant="outline" className="cursor-pointer rounded-full hover:border-primary">{t}</Badge>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </>
