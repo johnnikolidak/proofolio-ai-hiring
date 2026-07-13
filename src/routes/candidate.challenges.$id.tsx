@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { formatDistanceToNow } from "date-fns";
+import { formatChallengeDuration } from "@/lib/utils";
 
 export const Route = createFileRoute("/candidate/challenges/$id")({ component: ChallengeDetail });
 
@@ -170,7 +171,7 @@ function ChallengeDetail() {
             <div className="text-xs text-muted-foreground">Difficulty</div>
             <div className="mt-1 font-medium">{c.difficulty ?? "—"}</div>
             <div className="mt-3 text-xs text-muted-foreground">Estimated time</div>
-            <div className="mt-1 inline-flex items-center gap-1 font-medium"><Clock className="h-3 w-3" /> {c.duration_hours ? `${c.duration_hours} hr` : "—"}</div>
+            <div className="mt-1 inline-flex items-center gap-1 font-medium"><Clock className="h-3 w-3" /> {formatChallengeDuration(c)}</div>
             {(c.evidence_dimensions ?? []).length > 0 && (
               <>
                 <div className="mt-3 text-xs text-muted-foreground">Evidence dimensions</div>

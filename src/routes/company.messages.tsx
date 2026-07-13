@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { Loader2, Send } from "lucide-react";
+import { z } from "zod";
 import { PageHeader } from "@/components/DashboardShell";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -12,8 +13,11 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 
+const messagesSearchSchema = z.object({ thread: z.string().uuid().optional() });
+
 export const Route = createFileRoute("/company/messages")({
   component: Messages,
+  validateSearch: (s: Record<string, unknown>) => messagesSearchSchema.parse(s),
   head: () => ({ meta: [{ title: "Messages — Proofolio" }] }),
 });
 
@@ -24,7 +28,8 @@ type Party = { id: string; full_name: string | null; email: string };
 function Messages() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const [active, setActive] = useState<string | null>(null);
+  const { thread: threadFromSearch } = Route.useSearch();
+  const [active, setActive] = useState<string | null>(threadFromSearch ?? null);
   const [draft, setDraft] = useState("");
 
   const threadsQ = useQuery({
@@ -58,8 +63,9 @@ function Messages() {
   });
 
   useEffect(() => {
+    if (threadFromSearch) { setActive(threadFromSearch); return; }
     if (!active && threadsQ.data && threadsQ.data.length > 0) setActive(threadsQ.data[0].id);
-  }, [threadsQ.data, active]);
+  }, [threadsQ.data, active, threadFromSearch]);
 
   const messagesQ = useQuery({
     enabled: !!active,
