@@ -1,80 +1,50 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/DashboardShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/company/settings")({ component: Settings });
 
-function Row({ title, desc, control }: { title: string; desc: string; control: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-4">
-      <div>
-        <div className="text-sm font-medium">{title}</div>
-        <div className="text-xs text-muted-foreground">{desc}</div>
-      </div>
-      {control}
-    </div>
-  );
-}
-
 function Settings() {
+  const { user, profile, refreshProfile, signOut } = useAuth();
+  const [name, setName] = useState(profile?.full_name ?? "");
+  const [company, setCompany] = useState(profile?.company_name ?? "");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setName(profile?.full_name ?? "");
+    setCompany(profile?.company_name ?? "");
+  }, [profile]);
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setSaving(true);
+    const { error } = await supabase.from("profiles").update({ full_name: name, company_name: company }).eq("id", user.id);
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    await refreshProfile();
+    toast.success("Saved");
+  };
+
   return (
     <>
-      <PageHeader title="Settings" description="Workspace, team, and integrations." />
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card title="Workspace">
-          <div className="space-y-4">
-            <div className="space-y-1.5"><Label>Company</Label><Input defaultValue="Northwind Labs" /></div>
-            <div className="space-y-1.5"><Label>Website</Label><Input defaultValue="https://northwind.io" /></div>
-            <Button>Save</Button>
-          </div>
-        </Card>
-        <Card title="Team">
-          <div className="divide-y divide-border">
-            {[
-              ["Amelia Chen", "amelia@northwind.io", "Owner"],
-              ["Ravi Kumar", "ravi@northwind.io", "Admin"],
-              ["Ines Martins", "ines@northwind.io", "Recruiter"],
-            ].map(([n, e, r]) => (
-              <div key={e} className="flex items-center justify-between py-3">
-                <div>
-                  <div className="text-sm font-medium">{n}</div>
-                  <div className="text-xs text-muted-foreground">{e}</div>
-                </div>
-                <Badge variant="secondary" className="rounded-full">{r}</Badge>
-              </div>
-            ))}
-          </div>
-          <Button variant="outline" className="mt-3">Invite teammate</Button>
-        </Card>
-        <Card title="Integrations">
-          <div className="divide-y divide-border">
-            <Row title="Greenhouse" desc="Sync candidates to your ATS" control={<Switch defaultChecked />} />
-            <Row title="Slack" desc="Notifications in #hiring channel" control={<Switch defaultChecked />} />
-            <Row title="Google Calendar" desc="Interview scheduling" control={<Switch defaultChecked />} />
-            <Row title="Zapier" desc="Custom automations" control={<Switch />} />
-          </div>
-        </Card>
-        <Card title="Security">
-          <div className="divide-y divide-border">
-            <Row title="SSO / SAML" desc="Enforce SSO across the workspace" control={<Switch />} />
-            <Row title="Two-factor auth" desc="Required for admins" control={<Switch defaultChecked />} />
-            <Row title="Audit log" desc="30-day retention" control={<Switch defaultChecked />} />
-          </div>
-        </Card>
-      </div>
+      <PageHeader title="Settings" description="Manage your workspace." />
+      <form onSubmit={save} className="max-w-xl space-y-4 rounded-xl border border-border bg-card p-6">
+        <div className="space-y-1.5"><Label>Email</Label><Input value={profile?.email ?? user?.email ?? ""} disabled /></div>
+        <div className="space-y-1.5"><Label>Contact name</Label><Input value={name} onChange={(e) => setName(e.target.value)} required /></div>
+        <div className="space-y-1.5"><Label>Company name</Label><Input value={company} onChange={(e) => setCompany(e.target.value)} required /></div>
+        <div className="flex gap-2">
+          <Button type="submit" disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save changes</Button>
+          <Button type="button" variant="ghost" onClick={() => signOut()}>Sign out</Button>
+        </div>
+      </form>
     </>
-  );
-}
-
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-xl border border-border bg-card p-6">
-      <h3 className="font-semibold">{title}</h3>
-      <div className="mt-4">{children}</div>
-    </div>
   );
 }
