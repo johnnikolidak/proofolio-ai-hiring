@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/DashboardShell";
@@ -30,6 +31,7 @@ const tone: Record<string, string> = {
 
 function Applications() {
   const { user } = useAuth();
+  const qc = useQueryClient();
   const appsQ = useQuery({
     enabled: !!user?.id,
     queryKey: ["candidate", "applications", "full", user?.id],
@@ -42,6 +44,18 @@ function Applications() {
       if (error) throw error;
       return (data ?? []) as unknown as Row[];
     },
+  });
+
+  const withdraw = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("applications").update({ status: "withdrawn" }).eq("id", id).eq("candidate_id", user!.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Application withdrawn");
+      qc.invalidateQueries({ queryKey: ["candidate", "applications"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   return (
@@ -63,7 +77,7 @@ function Applications() {
                 <TableHead>Company</TableHead>
                 <TableHead>Stage</TableHead>
                 <TableHead>Applied</TableHead>
-                <TableHead></TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -73,7 +87,14 @@ function Applications() {
                   <TableCell className="text-muted-foreground">{a.jobs?.company_name ?? "—"}</TableCell>
                   <TableCell><Badge className={`rounded-full font-medium ${tone[a.status] ?? tone.submitted}`} variant="secondary">{a.status.replace("_", " ")}</Badge></TableCell>
                   <TableCell className="text-muted-foreground">{format(new Date(a.created_at), "MMM d")}</TableCell>
-                  <TableCell><Button asChild size="sm" variant="ghost"><Link to="/candidate/jobs/$id" params={{ id: a.job_id }}>View</Link></Button></TableCell>
+                  <TableCell className="text-right">
+                    <Button asChild size="sm" variant="ghost"><Link to="/candidate/jobs/$id" params={{ id: a.job_id }}>View</Link></Button>
+                    {!["withdrawn", "rejected", "offer"].includes(a.status) && (
+                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => {
+                        if (confirm("Withdraw this application? This cannot be undone.")) withdraw.mutate(a.id);
+                      }}>Withdraw</Button>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
