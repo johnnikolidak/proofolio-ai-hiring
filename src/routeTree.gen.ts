@@ -61,6 +61,8 @@ import { Route as AuthSignupRouteImport } from './routes/auth.signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
+import { Route as CandidateJobsIndexRouteImport } from './routes/candidate.jobs.index'
+import { Route as CandidateChallengesIndexRouteImport } from './routes/candidate.challenges.index'
 import { Route as CandidateJobsIdRouteImport } from './routes/candidate.jobs.$id'
 import { Route as CandidateChallengesIdRouteImport } from './routes/candidate.challenges.$id'
 
@@ -324,6 +326,17 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   path: '/auth/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CandidateJobsIndexRoute = CandidateJobsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CandidateJobsRoute,
+} as any)
+const CandidateChallengesIndexRoute =
+  CandidateChallengesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => CandidateChallengesRoute,
+  } as any)
 const CandidateJobsIdRoute = CandidateJobsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -390,6 +403,8 @@ export interface FileRoutesByFullPath {
   '/university/': typeof UniversityIndexRoute
   '/candidate/challenges/$id': typeof CandidateChallengesIdRoute
   '/candidate/jobs/$id': typeof CandidateJobsIdRoute
+  '/candidate/challenges/': typeof CandidateChallengesIndexRoute
+  '/candidate/jobs/': typeof CandidateJobsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -406,9 +421,7 @@ export interface FileRoutesByTo {
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/candidate/applications': typeof CandidateApplicationsRoute
   '/candidate/certificates': typeof CandidateCertificatesRoute
-  '/candidate/challenges': typeof CandidateChallengesRouteWithChildren
   '/candidate/interview': typeof CandidateInterviewRoute
-  '/candidate/jobs': typeof CandidateJobsRouteWithChildren
   '/candidate/messages': typeof CandidateMessagesRoute
   '/candidate/notifications': typeof CandidateNotificationsRoute
   '/candidate/profile': typeof CandidateProfileRoute
@@ -443,6 +456,8 @@ export interface FileRoutesByTo {
   '/university': typeof UniversityIndexRoute
   '/candidate/challenges/$id': typeof CandidateChallengesIdRoute
   '/candidate/jobs/$id': typeof CandidateJobsIdRoute
+  '/candidate/challenges': typeof CandidateChallengesIndexRoute
+  '/candidate/jobs': typeof CandidateJobsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -500,6 +515,8 @@ export interface FileRoutesById {
   '/university/': typeof UniversityIndexRoute
   '/candidate/challenges/$id': typeof CandidateChallengesIdRoute
   '/candidate/jobs/$id': typeof CandidateJobsIdRoute
+  '/candidate/challenges/': typeof CandidateChallengesIndexRoute
+  '/candidate/jobs/': typeof CandidateJobsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -558,6 +575,8 @@ export interface FileRouteTypes {
     | '/university/'
     | '/candidate/challenges/$id'
     | '/candidate/jobs/$id'
+    | '/candidate/challenges/'
+    | '/candidate/jobs/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -574,9 +593,7 @@ export interface FileRouteTypes {
     | '/auth/verify-email'
     | '/candidate/applications'
     | '/candidate/certificates'
-    | '/candidate/challenges'
     | '/candidate/interview'
-    | '/candidate/jobs'
     | '/candidate/messages'
     | '/candidate/notifications'
     | '/candidate/profile'
@@ -611,6 +628,8 @@ export interface FileRouteTypes {
     | '/university'
     | '/candidate/challenges/$id'
     | '/candidate/jobs/$id'
+    | '/candidate/challenges'
+    | '/candidate/jobs'
   id:
     | '__root__'
     | '/'
@@ -667,6 +686,8 @@ export interface FileRouteTypes {
     | '/university/'
     | '/candidate/challenges/$id'
     | '/candidate/jobs/$id'
+    | '/candidate/challenges/'
+    | '/candidate/jobs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1055,6 +1076,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/candidate/jobs/': {
+      id: '/candidate/jobs/'
+      path: '/'
+      fullPath: '/candidate/jobs/'
+      preLoaderRoute: typeof CandidateJobsIndexRouteImport
+      parentRoute: typeof CandidateJobsRoute
+    }
+    '/candidate/challenges/': {
+      id: '/candidate/challenges/'
+      path: '/'
+      fullPath: '/candidate/challenges/'
+      preLoaderRoute: typeof CandidateChallengesIndexRouteImport
+      parentRoute: typeof CandidateChallengesRoute
+    }
     '/candidate/jobs/$id': {
       id: '/candidate/jobs/$id'
       path: '/$id'
@@ -1074,10 +1109,12 @@ declare module '@tanstack/react-router' {
 
 interface CandidateChallengesRouteChildren {
   CandidateChallengesIdRoute: typeof CandidateChallengesIdRoute
+  CandidateChallengesIndexRoute: typeof CandidateChallengesIndexRoute
 }
 
 const CandidateChallengesRouteChildren: CandidateChallengesRouteChildren = {
   CandidateChallengesIdRoute: CandidateChallengesIdRoute,
+  CandidateChallengesIndexRoute: CandidateChallengesIndexRoute,
 }
 
 const CandidateChallengesRouteWithChildren =
@@ -1085,10 +1122,12 @@ const CandidateChallengesRouteWithChildren =
 
 interface CandidateJobsRouteChildren {
   CandidateJobsIdRoute: typeof CandidateJobsIdRoute
+  CandidateJobsIndexRoute: typeof CandidateJobsIndexRoute
 }
 
 const CandidateJobsRouteChildren: CandidateJobsRouteChildren = {
   CandidateJobsIdRoute: CandidateJobsIdRoute,
+  CandidateJobsIndexRoute: CandidateJobsIndexRoute,
 }
 
 const CandidateJobsRouteWithChildren = CandidateJobsRoute._addFileChildren(
@@ -1216,3 +1255,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

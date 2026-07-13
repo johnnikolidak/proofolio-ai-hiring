@@ -34,6 +34,73 @@ const CV_MIME = [
 ];
 const LANGUAGE_LEVELS = ["Basic", "Conversational", "Fluent", "Native"];
 
+// Existing profiles can have nested rows saved before a field existed (missing key)
+// or with `null` from an older write — normalize both to "" instead of failing validation.
+const str = (max: number) =>
+  z.preprocess((v) => (v === null || v === undefined ? "" : v), z.string().trim().max(max));
+
+const isBlank = (...values: (string | undefined)[]) => values.every((v) => !v?.trim());
+
+const educationItemSchema = z.object({ school: str(120), degree: str(120), year: str(20) });
+const experienceItemSchema = z.object({
+  title: str(120),
+  company: str(120),
+  from: str(30),
+  to: str(30),
+  description: str(1000),
+});
+const languageItemSchema = z.object({ name: str(60), level: str(30) });
+const portfolioItemSchema = z.object({
+  title: str(120),
+  // Only enforce URL shape when a link was actually entered — a blank draft row must not block save.
+  url: str(2000).refine((v) => v === "" || /^https?:\/\/\S+$/i.test(v), "must be a valid link starting with http:// or https://"),
+  description: str(400),
+});
+
+const profileFormSchema = z.object({
+  full_name: str(120),
+  headline: str(160),
+  bio: str(2000),
+  location: str(120),
+  availability: str(60),
+  is_public: z.boolean(),
+  skills: z.array(z.string().trim().min(1).max(40)).max(50),
+  preferred_roles: z.array(z.string().trim().min(1).max(60)).max(20),
+  education: z.array(educationItemSchema),
+  experience: z.array(experienceItemSchema),
+  languages: z.array(languageItemSchema).max(20),
+  portfolio: z.array(portfolioItemSchema).max(20),
+  links: z
+    .object({
+      website: z.string().url().optional().or(z.literal("")),
+      linkedin: z.string().url().optional().or(z.literal("")),
+      github: z.string().url().optional().or(z.literal("")),
+      twitter: z.string().url().optional().or(z.literal("")),
+    })
+    .partial(),
+});
+
+const SECTION_LABELS: Record<string, string> = {
+  full_name: "About",
+  headline: "About",
+  bio: "About",
+  location: "About",
+  availability: "About",
+  skills: "Skills",
+  preferred_roles: "Preferred roles",
+  education: "Education",
+  experience: "Experience",
+  languages: "Languages",
+  portfolio: "Portfolio",
+  links: "Links",
+};
+
+function friendlyValidationMessage(error: z.ZodError): string {
+  const issue = error.issues[0];
+  const section = (issue?.path?.[0] && SECTION_LABELS[String(issue.path[0])]) || "profile";
+  return `Please check the ${section} section — ${issue?.message ?? "one of the fields is invalid"}.`;
+}
+
 function Profile() {
   const { user, refreshProfile } = useAuth();
   const qc = useQueryClient();
@@ -114,26 +181,18 @@ function Profile() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const validated = z.object({
-        full_name: z.string().trim().max(120),
-        headline: z.string().trim().max(160),
-        bio: z.string().trim().max(2000),
-        location: z.string().trim().max(120),
-        availability: z.string().trim().max(60),
-        is_public: z.boolean(),
-        skills: z.array(z.string().trim().min(1).max(40)).max(50),
-        preferred_roles: z.array(z.string().trim().min(1).max(60)).max(20),
-        education: z.array(z.object({ school: z.string().max(120), degree: z.string().max(120), year: z.string().max(20) })),
-        experience: z.array(z.object({ title: z.string().max(120), company: z.string().max(120), from: z.string().max(30), to: z.string().max(30), description: z.string().max(1000).optional() })),
-        languages: z.array(z.object({ name: z.string().min(1).max(60), level: z.string().min(1).max(30) })).max(20),
-        portfolio: z.array(z.object({ title: z.string().min(1).max(120), url: z.string().url(), description: z.string().max(400).optional() })).max(20),
-        links: z.object({
-          website: z.string().url().optional().or(z.literal("")),
-          linkedin: z.string().url().optional().or(z.literal("")),
-          github: z.string().url().optional().or(z.literal("")),
-          twitter: z.string().url().optional().or(z.literal("")),
-        }).partial(),
-      }).parse(form);
+      // Drop rows the user added but never filled in — they carry no data and must
+      // never block saving an unrelated section (e.g. About) from succeeding.
+      const payload = {
+        ...form,
+        education: form.education.filter((e) => !isBlank(e.school, e.degree, e.year)),
+        experience: form.experience.filter((e) => !isBlank(e.title, e.company, e.from, e.to, e.description)),
+        languages: form.languages.filter((l) => !isBlank(l.name, l.level)),
+        portfolio: form.portfolio.filter((p) => !isBlank(p.title, p.url, p.description)),
+      };
+      const result = profileFormSchema.safeParse(payload);
+      if (!result.success) throw new Error(friendlyValidationMessage(result.error));
+      const validated = result.data;
       const { error } = await supabase.from("profiles").update({
         full_name: validated.full_name || null,
         headline: validated.headline || null,

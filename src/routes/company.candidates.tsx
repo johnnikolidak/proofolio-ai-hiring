@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -23,8 +23,10 @@ const STATUSES = ["submitted", "in_review", "interview", "offer", "rejected", "w
 function Candidates() {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [pendingThreadFor, setPendingThreadFor] = useState<string | null>(null);
 
   const applicantsQ = useQuery({
     enabled: !!user?.id,
@@ -64,17 +66,33 @@ function Candidates() {
 
   const openThread = useMutation({
     mutationFn: async (candidateId: string) => {
-      const { data: existing } = await supabase.from("message_threads")
+      const { data: existing, error: selErr } = await supabase.from("message_threads")
         .select("id").eq("candidate_id", candidateId).eq("counterpart_id", user!.id).maybeSingle();
-      if (existing) return existing.id;
+      if (selErr) throw selErr;
+      if (existing) return existing.id as string;
       const { data, error } = await supabase.from("message_threads")
         .insert({ candidate_id: candidateId, counterpart_id: user!.id, subject: "About your application" })
         .select("id").single();
-      if (error) throw error;
+      if (error) {
+        // Unique constraint race from a repeated click (or another tab) beat us to it —
+        // reuse the thread that already exists instead of surfacing a raw DB error.
+        if (error.code === "23505") {
+          const { data: raced, error: raceErr } = await supabase.from("message_threads")
+            .select("id").eq("candidate_id", candidateId).eq("counterpart_id", user!.id).single();
+          if (raceErr) throw raceErr;
+          return raced.id as string;
+        }
+        throw error;
+      }
       return data.id as string;
     },
-    onSuccess: () => { toast.success("Conversation opened — see Messages"); qc.invalidateQueries({ queryKey: ["company", "threads"] }); },
-    onError: (e: Error) => toast.error(e.message),
+    onMutate: (candidateId) => setPendingThreadFor(candidateId),
+    onSuccess: (threadId) => {
+      qc.invalidateQueries({ queryKey: ["company", "threads"] });
+      navigate({ to: "/company/messages", search: { thread: threadId } });
+    },
+    onError: (e: Error) => toast.error(e.message || "Couldn't open the conversation. Try again."),
+    onSettled: () => setPendingThreadFor(null),
   });
 
   const rows = useMemo(() => {
@@ -139,7 +157,15 @@ function Candidates() {
                   </Select>
                   <div className="flex gap-1">
                     {r.profile?.is_public && <Button asChild size="sm" variant="outline"><a href={`/p/${r.candidate_id}`} target="_blank" rel="noreferrer">Profile</a></Button>}
-                    <Button size="sm" variant="outline" onClick={() => openThread.mutate(r.candidate_id)}><MessageSquare className="h-3 w-3" /></Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      aria-label="Message candidate"
+                      onClick={() => openThread.mutate(r.candidate_id)}
+                      disabled={pendingThreadFor === r.candidate_id}
+                    >
+                      {pendingThreadFor === r.candidate_id ? <Loader2 className="h-3 w-3 animate-spin" /> : <MessageSquare className="h-3 w-3" />}
+                    </Button>
                   </div>
                 </div>
               </div>
