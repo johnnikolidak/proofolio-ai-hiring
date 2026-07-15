@@ -167,21 +167,17 @@ export const sendPartnershipRequestEmails = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const [confirm, notify] = await Promise.all([
-      sendAppEmailInternal(
-        data: {
-          to: data.email,
-          subject: `Your Proofolio partnership inquiry`,
-          template: "partnership_request_confirmation",
-          data: data as unknown as Record<string, unknown>,
-        },
+      sendAppEmailInternal({
+        to: data.email,
+        subject: `Your Proofolio partnership inquiry`,
+        template: "partnership_request_confirmation",
+        data: data as unknown as Record<string, unknown>,
       }),
-      sendAppEmailInternal(
-        data: {
-          to: ADMIN_NOTIFICATION_ADDRESS,
-          subject: `New ${data.kind} partnership request — ${data.organization}`,
-          template: "partnership_request_admin_notification",
-          data: data as unknown as Record<string, unknown>,
-        },
+      sendAppEmailInternal({
+        to: ADMIN_NOTIFICATION_ADDRESS,
+        subject: `New ${data.kind} partnership request — ${data.organization}`,
+        template: "partnership_request_admin_notification",
+        data: data as unknown as Record<string, unknown>,
       }),
     ]);
     return { confirm, notify };
