@@ -737,42 +737,6 @@ export type Database = {
           },
         ]
       }
-      university_students: {
-        Row: {
-          candidate_id: string
-          created_at: string
-          id: string
-          university_id: string
-        }
-        Insert: {
-          candidate_id: string
-          created_at?: string
-          id?: string
-          university_id: string
-        }
-        Update: {
-          candidate_id?: string
-          created_at?: string
-          id?: string
-          university_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "university_students_candidate_id_fkey"
-            columns: ["candidate_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "university_students_university_id_fkey"
-            columns: ["university_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_roles: {
         Row: {
           created_at: string
