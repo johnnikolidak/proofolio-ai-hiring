@@ -737,42 +737,6 @@ export type Database = {
           },
         ]
       }
-      university_students: {
-        Row: {
-          candidate_id: string
-          created_at: string
-          id: string
-          university_id: string
-        }
-        Insert: {
-          candidate_id: string
-          created_at?: string
-          id?: string
-          university_id: string
-        }
-        Update: {
-          candidate_id?: string
-          created_at?: string
-          id?: string
-          university_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "university_students_candidate_id_fkey"
-            columns: ["candidate_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "university_students_university_id_fkey"
-            columns: ["university_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_roles: {
         Row: {
           created_at: string
@@ -853,7 +817,60 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          completion_pct: number | null
+          cv_url: string | null
+          education: Json | null
+          experience: Json | null
+          full_name: string | null
+          headline: string | null
+          id: string | null
+          is_public: boolean | null
+          languages: Json | null
+          location: string | null
+          portfolio: Json | null
+          preferred_roles: string[] | null
+          skills: string[] | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          completion_pct?: number | null
+          cv_url?: string | null
+          education?: Json | null
+          experience?: Json | null
+          full_name?: string | null
+          headline?: string | null
+          id?: string | null
+          is_public?: boolean | null
+          languages?: Json | null
+          location?: string | null
+          portfolio?: Json | null
+          preferred_roles?: string[] | null
+          skills?: string[] | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          completion_pct?: number | null
+          cv_url?: string | null
+          education?: Json | null
+          experience?: Json | null
+          full_name?: string | null
+          headline?: string | null
+          id?: string | null
+          is_public?: boolean | null
+          languages?: Json | null
+          location?: string | null
+          portfolio?: Json | null
+          preferred_roles?: string[] | null
+          skills?: string[] | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
