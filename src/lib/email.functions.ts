@@ -103,19 +103,21 @@ async function attemptSend(to: string, subject: string, html: string, text: stri
   }
 }
 
-export const sendAppEmail = createServerFn({ method: "POST" })
-  .inputValidator((raw: unknown) => inputSchema.parse(raw))
-  .handler(async ({ data }) => {
-    const { html, text } = renderTemplate(data);
-    const result = await attemptSend(data.to, data.subject, html, text);
-    const status = result.sent ? "sent" : result.dev ? "dev_fallback" : "failed";
-    await logEmail(data.to, data.subject, data.template, data.data, status, "error" in result ? result.error : undefined);
-    if (!result.sent) {
-      // eslint-disable-next-line no-console
-      console.log(`[email:${status}] to=${data.to} subject="${data.subject}" template=${data.template}`);
-    }
-    return { sent: result.sent, dev: "dev" in result ? result.dev : false, status };
-  });
+// Internal-only sender. Not exposed as a server function to prevent abuse as an open email relay.
+// Only reachable through the specific createServerFn wrappers below (demo/partnership), each of
+// which is bound to a fixed template and hard-coded recipient set.
+async function sendAppEmailInternal(input: Input) {
+  const data = inputSchema.parse(input);
+  const { html, text } = renderTemplate(data);
+  const result = await attemptSend(data.to, data.subject, html, text);
+  const status = result.sent ? "sent" : result.dev ? "dev_fallback" : "failed";
+  await logEmail(data.to, data.subject, data.template, data.data, status, "error" in result ? result.error : undefined);
+  if (!result.sent) {
+    // eslint-disable-next-line no-console
+    console.log(`[email:${status}] to=${data.to} subject="${data.subject}" template=${data.template}`);
+  }
+  return { sent: result.sent, dev: "dev" in result ? result.dev : false, status };
+}
 
 export const sendDemoRequestEmails = createServerFn({ method: "POST" })
   .inputValidator((raw: unknown) =>
