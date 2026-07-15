@@ -817,7 +817,60 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          completion_pct: number | null
+          cv_url: string | null
+          education: Json | null
+          experience: Json | null
+          full_name: string | null
+          headline: string | null
+          id: string | null
+          is_public: boolean | null
+          languages: Json | null
+          location: string | null
+          portfolio: Json | null
+          preferred_roles: string[] | null
+          skills: string[] | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          completion_pct?: number | null
+          cv_url?: string | null
+          education?: Json | null
+          experience?: Json | null
+          full_name?: string | null
+          headline?: string | null
+          id?: string | null
+          is_public?: boolean | null
+          languages?: Json | null
+          location?: string | null
+          portfolio?: Json | null
+          preferred_roles?: string[] | null
+          skills?: string[] | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          completion_pct?: number | null
+          cv_url?: string | null
+          education?: Json | null
+          experience?: Json | null
+          full_name?: string | null
+          headline?: string | null
+          id?: string | null
+          is_public?: boolean | null
+          languages?: Json | null
+          location?: string | null
+          portfolio?: Json | null
+          preferred_roles?: string[] | null
+          skills?: string[] | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
