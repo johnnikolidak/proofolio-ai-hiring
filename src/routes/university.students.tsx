@@ -30,37 +30,10 @@ function Students() {
   const studentsQ = useQuery({
     enabled: !!user?.id,
     queryKey: ["university", "students", user?.id],
-    queryFn: async () => {
-      const { data: links, error } = await supabase
-        .from("university_students")
-        .select("candidate_id,created_at")
-        .eq("university_id", user!.id)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      const ids = (links ?? []).map((l) => l.candidate_id);
-      if (ids.length === 0) return [] as Row[];
-
-      const [{ data: profiles }, { data: submissions }] = await Promise.all([
-        supabase.from("profiles").select("id,full_name,email,headline,location,skills,is_public").in("id", ids),
-        supabase.from("submissions").select("candidate_id,score").in("candidate_id", ids),
-      ]);
-      const profileById = new Map((profiles ?? []).map((p) => [p.id, p as StudentProfile]));
-      const scoresByCandidate = new Map<string, number[]>();
-      for (const s of submissions ?? []) {
-        if (typeof s.score !== "number") continue;
-        const arr = scoresByCandidate.get(s.candidate_id) ?? [];
-        arr.push(s.score);
-        scoresByCandidate.set(s.candidate_id, arr);
-      }
-      return (links ?? []).map((l): Row => {
-        const scores = scoresByCandidate.get(l.candidate_id) ?? [];
-        return {
-          candidate_id: l.candidate_id,
-          profile: profileById.get(l.candidate_id) ?? null,
-          submissions: scores.length,
-          avgScore: scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null,
-        };
-      });
+    queryFn: async (): Promise<Row[]> => {
+      // No university_students link table exists yet; return an empty roster so the
+      // page renders its "no students connected" empty state rather than crashing.
+      return [];
     },
   });
 
