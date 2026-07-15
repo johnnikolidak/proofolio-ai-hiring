@@ -135,21 +135,17 @@ export const sendDemoRequestEmails = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const [confirm, notify] = await Promise.all([
-      sendAppEmailInternal(
-        data: {
-          to: data.email,
-          subject: `Your Proofolio demo request`,
-          template: "demo_request_confirmation",
-          data: data as unknown as Record<string, unknown>,
-        },
+      sendAppEmailInternal({
+        to: data.email,
+        subject: `Your Proofolio demo request`,
+        template: "demo_request_confirmation",
+        data: data as unknown as Record<string, unknown>,
       }),
-      sendAppEmailInternal(
-        data: {
-          to: ADMIN_NOTIFICATION_ADDRESS,
-          subject: `New demo request — ${data.company}`,
-          template: "demo_request_admin_notification",
-          data: data as unknown as Record<string, unknown>,
-        },
+      sendAppEmailInternal({
+        to: ADMIN_NOTIFICATION_ADDRESS,
+        subject: `New demo request — ${data.company}`,
+        template: "demo_request_admin_notification",
+        data: data as unknown as Record<string, unknown>,
       }),
     ]);
     return { confirm, notify };
