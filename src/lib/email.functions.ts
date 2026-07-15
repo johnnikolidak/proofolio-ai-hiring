@@ -135,7 +135,7 @@ export const sendDemoRequestEmails = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const [confirm, notify] = await Promise.all([
-      sendAppEmail({
+      sendAppEmailInternal(
         data: {
           to: data.email,
           subject: `Your Proofolio demo request`,
@@ -143,7 +143,7 @@ export const sendDemoRequestEmails = createServerFn({ method: "POST" })
           data: data as unknown as Record<string, unknown>,
         },
       }),
-      sendAppEmail({
+      sendAppEmailInternal(
         data: {
           to: ADMIN_NOTIFICATION_ADDRESS,
           subject: `New demo request — ${data.company}`,
@@ -171,7 +171,7 @@ export const sendPartnershipRequestEmails = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const [confirm, notify] = await Promise.all([
-      sendAppEmail({
+      sendAppEmailInternal(
         data: {
           to: data.email,
           subject: `Your Proofolio partnership inquiry`,
@@ -179,7 +179,7 @@ export const sendPartnershipRequestEmails = createServerFn({ method: "POST" })
           data: data as unknown as Record<string, unknown>,
         },
       }),
-      sendAppEmail({
+      sendAppEmailInternal(
         data: {
           to: ADMIN_NOTIFICATION_ADDRESS,
           subject: `New ${data.kind} partnership request — ${data.organization}`,
