@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { useRedirectIfAuthed } from "@/hooks/use-guest";
+import { useRedirectIfAuthed, dashboardPathFor } from "@/hooks/use-guest";
 
 export const Route = createFileRoute("/auth/login")({
   component: Login,
@@ -54,13 +54,8 @@ function Login() {
     ]);
     setLoading(false);
     toast.success("Welcome back");
-    if (adminRow) {
-      navigate({ to: "/admin" });
-    } else if (profileRow?.role === "company") {
-      navigate({ to: "/company" });
-    } else {
-      navigate({ to: "/candidate" });
-    }
+    const dest = dashboardPathFor({ isAdmin: !!adminRow, role: profileRow?.role });
+    navigate({ to: dest });
   };
 
   return (
