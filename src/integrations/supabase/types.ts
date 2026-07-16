@@ -819,6 +819,7 @@ export type Database = {
     Views: {
       public_profiles: {
         Row: {
+          availability: string | null
           avatar_url: string | null
           bio: string | null
           completion_pct: number | null
@@ -830,12 +831,14 @@ export type Database = {
           id: string | null
           is_public: boolean | null
           languages: Json | null
+          links: Json | null
           location: string | null
           portfolio: Json | null
           preferred_roles: string[] | null
           skills: string[] | null
         }
         Insert: {
+          availability?: string | null
           avatar_url?: string | null
           bio?: string | null
           completion_pct?: number | null
@@ -847,12 +850,14 @@ export type Database = {
           id?: string | null
           is_public?: boolean | null
           languages?: Json | null
+          links?: Json | null
           location?: string | null
           portfolio?: Json | null
           preferred_roles?: string[] | null
           skills?: string[] | null
         }
         Update: {
+          availability?: string | null
           avatar_url?: string | null
           bio?: string | null
           completion_pct?: number | null
@@ -864,6 +869,7 @@ export type Database = {
           id?: string | null
           is_public?: boolean | null
           languages?: Json | null
+          links?: Json | null
           location?: string | null
           portfolio?: Json | null
           preferred_roles?: string[] | null
