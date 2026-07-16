@@ -11,7 +11,7 @@ export const Route = createFileRoute("/p/$id")({
   component: PublicProfile,
   loader: async ({ params }) => {
     const { data, error } = await supabase
-      .from("profiles")
+      .from("public_profiles")
       .select("id,full_name,headline,bio,location,avatar_url,skills,preferred_roles,availability,education,experience,links,is_public")
       .eq("id", params.id)
       .maybeSingle();
