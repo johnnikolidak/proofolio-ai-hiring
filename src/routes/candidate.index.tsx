@@ -29,15 +29,43 @@ function Overview() {
     },
   });
 
+  const attemptsQ = useQuery({
+    queryKey: ["candidate", "attempts-overview", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("challenge_attempts")
+        .select("id,status")
+        .eq("candidate_id", user!.id);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const certsQ = useQuery({
+    queryKey: ["candidate", "certificates-count", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("certificates")
+        .select("id", { count: "exact", head: true })
+        .eq("candidate_id", user!.id);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
   const subs = submissionsQ.data ?? [];
-  const inProgress = subs.filter((s) => s.status === "in_progress").length;
+  const attempts = attemptsQ.data ?? [];
+  const inProgress = attempts.filter((a) => a.status === "in_progress").length;
   const submitted = subs.filter((s) => s.status === "submitted" || s.status === "reviewed").length;
+  const certificates = certsQ.data ?? 0;
 
   const stats = [
     { label: "Profile", value: profile?.full_name ? "Set up" : "Incomplete", delta: profile?.full_name ? "Add work & skills next" : "Add your name & bio", Icon: User },
     { label: "Challenges in progress", value: String(inProgress), delta: inProgress ? "Keep going" : "Browse to start", Icon: Target },
     { label: "Submissions", value: String(submitted), delta: submitted ? "Awaiting review" : "None yet", Icon: TrendingUp },
-    { label: "Certificates", value: "0", delta: "Earn from challenges", Icon: Award },
+    { label: "Certificates", value: String(certificates), delta: certificates ? "View & share" : "Earn from challenges", Icon: Award },
   ];
 
   const profileCompletion = (() => {
