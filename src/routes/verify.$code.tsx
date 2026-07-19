@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Award, CheckCircle2, Loader2, XCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { verifyCertificate } from "@/lib/verify.functions";
 
 export const Route = createFileRoute("/verify/$code")({
   component: Verify,
@@ -15,9 +15,7 @@ function Verify() {
   const q = useQuery({
     queryKey: ["verify", code],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("verify_certificate", { _code: code });
-      if (error) throw error;
-      const row = Array.isArray(data) ? data[0] : (data as any);
+      const row = await verifyCertificate({ data: { code } });
       if (!row) return null;
       return {
         id: row.id, title: row.title, issuer: row.issuer, score: row.score,

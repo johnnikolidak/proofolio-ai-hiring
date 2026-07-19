@@ -6,6 +6,27 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Returns the URL only when it uses a safe http(s) scheme, otherwise undefined.
+ * Prevents javascript:, data:, vbscript: and other script-executing URIs from
+ * being rendered as clickable links (stored-XSS defense for user-supplied URLs).
+ */
+export function safeHref(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  const trimmed = String(url).trim();
+  if (!trimmed) return undefined;
+  try {
+    const parsed = new URL(trimmed, "https://placeholder.invalid");
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      // Reject relative URLs (they'd resolve against the placeholder base).
+      if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Candidate-facing duration label only. The stored `duration_hours` column still
  * holds the original multi-hour estimates — this maps them onto realistic
  * short-challenge bands until a proper duration schema migration replaces the column.

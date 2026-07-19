@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { formatDistanceToNow } from "date-fns";
-import { formatChallengeDuration } from "@/lib/utils";
+import { formatChallengeDuration, safeHref } from "@/lib/utils";
 
 export const Route = createFileRoute("/candidate/challenges/$id")({ component: ChallengeDetail });
 
@@ -126,7 +126,7 @@ function ChallengeDetail() {
               <div>
                 <div className="inline-flex items-center gap-2 rounded-full bg-success/15 px-3 py-1 text-xs text-success"><CheckCircle2 className="h-3 w-3" /> Submitted {attempt.submitted_at ? formatDistanceToNow(new Date(attempt.submitted_at), { addSuffix: true }) : ""}</div>
                 {attempt.content && <p className="mt-4 whitespace-pre-line text-sm">{attempt.content}</p>}
-                {attempt.file_url && <a href={attempt.file_url} target="_blank" rel="noreferrer" className="mt-2 block text-sm text-primary underline">{attempt.file_url}</a>}
+                {safeHref(attempt.file_url) && <a href={safeHref(attempt.file_url)} target="_blank" rel="noreferrer" className="mt-2 block text-sm text-primary underline break-all">{attempt.file_url}</a>}
               </div>
             ) : !attempt ? (
               <div>

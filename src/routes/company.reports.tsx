@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { safeHref } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/company/reports")({
@@ -85,7 +86,7 @@ function Row({ s, onSaved }: { s: { id: string; candidate_id: string; challenge_
         <Badge className="rounded-full">{s.status.replace("_", " ")}</Badge>
       </div>
       {s.content && <p className="mt-3 whitespace-pre-line text-sm text-muted-foreground line-clamp-6">{s.content}</p>}
-      {s.file_url && <a href={s.file_url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs text-primary underline">{s.file_url}</a>}
+      {safeHref(s.file_url) && <a href={safeHref(s.file_url)} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs text-primary underline break-all">{s.file_url}</a>}
       <div className="mt-4 grid gap-3 md:grid-cols-[120px_1fr_auto] md:items-end">
         <div>
           <label className="text-xs text-muted-foreground">Score (0–100)</label>
