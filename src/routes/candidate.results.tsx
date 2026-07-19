@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
+import { safeHref } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/candidate/results")({
@@ -91,7 +92,7 @@ function Results() {
                   <div className="mt-4 rounded-lg border border-border p-4">
                     <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Your evidence</div>
                     {r.content && <p className="mt-1 whitespace-pre-line text-sm line-clamp-4">{r.content}</p>}
-                    {r.file_url && <a href={r.file_url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm text-primary underline">{r.file_url}</a>}
+                    {safeHref(r.file_url) && <a href={safeHref(r.file_url)} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm text-primary underline break-all">{r.file_url}</a>}
                   </div>
                 )}
                 {scored && Number(r.score) >= 70 && (
