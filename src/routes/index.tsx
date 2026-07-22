@@ -1,7 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Building2, GraduationCap, LayoutDashboard, School, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  GraduationCap,
+  LayoutDashboard,
+  PlayCircle,
+  School,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ProofProfilePreview } from "@/components/marketing/ProofProfilePreview";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
@@ -11,15 +21,33 @@ export const Route = createFileRoute("/")({
   component: Landing,
   head: () => ({
     meta: [
-      { title: "Proofolio — Hire on proof of skill, not a résumé" },
-      { name: "description", content: "Proofolio is the skills platform for candidates, companies and universities. Real business challenges. AI-scored evidence. Verified proof profiles." },
-      { property: "og:title", content: "Proofolio — Hire on proof of skill, not a résumé" },
-      { property: "og:description", content: "Proofolio is the skills platform for candidates, companies and universities. Real business challenges. AI-scored evidence. Verified proof profiles." },
+      { title: "Proofolio — The hiring platform where candidates prove their skills" },
+      {
+        name: "description",
+        content:
+          "Proofolio is the hiring platform where candidates prove their skills through real work, before the interview. Move beyond resumes with real-world challenges, verified evidence and AI-powered insights.",
+      },
+      {
+        property: "og:title",
+        content: "Proofolio — The hiring platform where candidates prove their skills",
+      },
+      {
+        property: "og:description",
+        content:
+          "Move beyond resumes and evaluate candidates through real-world challenges, verified evidence and AI-powered insights.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
 });
+
+const valueFlow = [
+  "Create Challenge",
+  "Complete Challenge",
+  "Build Proof Profile",
+  "Hire with Confidence",
+];
 
 const paths = [
   {
@@ -67,23 +95,67 @@ function Landing() {
         <div className="absolute inset-0 grid-bg" />
         <div className="container-page relative pt-20 pb-14 md:pt-28 md:pb-20">
           <div className="mx-auto max-w-3xl text-center">
-            <Badge variant="secondary" className="animate-fade-in-up mb-5 gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs shadow-soft">
+            <Badge
+              variant="secondary"
+              className="animate-fade-in-up mb-5 gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs shadow-soft"
+            >
               <Sparkles className="h-3 w-3 text-primary" /> One platform. Three experiences.
             </Badge>
             <h1 className="animate-fade-in-up delay-100 text-4xl font-semibold tracking-tight md:text-6xl">
-              Hire on <span className="text-gradient">proof of skill.</span>
-              <br />Not a résumé.
+              The hiring platform where candidates{" "}
+              <span className="text-gradient">prove their skills through real work</span>, before
+              the interview.
             </h1>
             <p className="animate-fade-in-up delay-200 mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-              Proofolio replaces guesswork with evidence. Candidates prove their abilities through real business challenges. Companies evaluate real work before interviews. Universities connect their students to employers with verified proof profiles.
+              Move beyond resumes and evaluate candidates through real-world challenges, verified
+              evidence and AI-powered insights.
             </p>
-            {session && (
-              <div className="animate-fade-in-up delay-300 mt-8">
+
+            <div className="animate-fade-in-up delay-300 mt-8 flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-xs font-medium text-muted-foreground sm:text-sm">
+              {valueFlow.map((step, i) => (
+                <div key={step} className="flex items-center gap-2">
+                  <span className={i === valueFlow.length - 1 ? "text-foreground" : undefined}>
+                    {step}
+                  </span>
+                  {i < valueFlow.length - 1 && (
+                    <ArrowRight className="h-3.5 w-3.5 text-primary/60" aria-hidden="true" />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="animate-fade-in-up delay-400 mt-8 flex flex-wrap items-center justify-center gap-3">
+              {session ? (
                 <Button asChild size="lg" className="h-12 gap-1.5 px-6 shadow-elev">
-                  <Link to={dash}><LayoutDashboard className="h-4 w-4" /> Open your dashboard <ArrowRight className="h-4 w-4" /></Link>
+                  <Link to={dash}>
+                    <LayoutDashboard className="h-4 w-4" /> Open your dashboard{" "}
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </Button>
-              </div>
+              ) : (
+                <>
+                  <Button asChild size="lg" className="h-12 gap-1.5 px-6 shadow-elev">
+                    <Link to="/auth/signup">
+                      Get started <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button asChild size="lg" variant="outline" className="h-12 gap-1.5 px-6">
+                    <Link to="/demo">
+                      <PlayCircle className="h-4 w-4" /> View Demo
+                    </Link>
+                  </Button>
+                </>
+              )}
+            </div>
+            {!session && (
+              <p className="animate-fade-in-up delay-500 mt-4 text-xs text-muted-foreground">
+                No resume required. No credit card required.
+              </p>
             )}
+          </div>
+
+          <div className="animate-fade-in-up delay-500 mt-14 md:mt-20">
+            <ProofProfilePreview />
           </div>
         </div>
       </section>
@@ -91,7 +163,9 @@ function Landing() {
       <section id="choose" className="container-page pb-20 md:pb-28">
         <div className="mb-10 text-center">
           <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Choose your path</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Each experience is a complete platform with its own tools, dashboard and workflows.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Each experience is a complete platform with its own tools, dashboard and workflows.
+          </p>
         </div>
         <div className="grid gap-6 lg:grid-cols-3">
           {paths.map((p) => (
@@ -100,10 +174,14 @@ function Landing() {
               to={p.href}
               className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card p-8 transition-all hover:-translate-y-1 hover:shadow-glow"
             >
-              <div className={`grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br ${p.accent} text-primary-foreground shadow-soft`}>
+              <div
+                className={`grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br ${p.accent} text-primary-foreground shadow-soft`}
+              >
                 <p.Icon className="h-7 w-7" />
               </div>
-              <div className="mt-6 text-xs font-medium uppercase tracking-wider text-muted-foreground">{p.tag}</div>
+              <div className="mt-6 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                {p.tag}
+              </div>
               <h3 className="mt-2 text-2xl font-semibold tracking-tight">{p.title}</h3>
               <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{p.desc}</p>
               <div className="mt-8 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
@@ -119,9 +197,21 @@ function Landing() {
         <div className="container-page py-16 md:py-24">
           <div className="grid gap-8 md:grid-cols-3">
             {[
-              [Sparkles, "Real work, not quizzes", "Every challenge is a scoped, realistic brief that mirrors the actual role."],
-              [ShieldCheck, "Evidence you can audit", "Transparent rubrics, evidence-linked scores, human review, exportable logs."],
-              [GraduationCap, "A résumé that proves itself", "Candidates own a public Proof Profile. Certificates verify each achievement."],
+              [
+                Sparkles,
+                "Real work, not quizzes",
+                "Every challenge is a scoped, realistic brief that mirrors the actual role.",
+              ],
+              [
+                ShieldCheck,
+                "Evidence you can audit",
+                "Transparent rubrics, evidence-linked scores, human review, exportable logs.",
+              ],
+              [
+                GraduationCap,
+                "A résumé that proves itself",
+                "Candidates own a public Proof Profile. Certificates verify each achievement.",
+              ],
             ].map(([Icon, t, d]) => (
               <div key={t as string}>
                 <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary-soft text-primary">

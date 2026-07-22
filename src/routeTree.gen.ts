@@ -14,6 +14,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ForUniversitiesRouteImport } from './routes/for-universities'
 import { Route as ForCompaniesRouteImport } from './routes/for-companies'
 import { Route as ForCandidatesRouteImport } from './routes/for-candidates'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as CompanyRouteImport } from './routes/company'
 import { Route as CandidateRouteImport } from './routes/candidate'
 import { Route as BookDemoRouteImport } from './routes/book-demo'
@@ -89,6 +90,11 @@ const ForCompaniesRoute = ForCompaniesRouteImport.update({
 const ForCandidatesRoute = ForCandidatesRouteImport.update({
   id: '/for-candidates',
   path: '/for-candidates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompanyRoute = CompanyRouteImport.update({
@@ -354,6 +360,7 @@ export interface FileRoutesByFullPath {
   '/book-demo': typeof BookDemoRoute
   '/candidate': typeof CandidateRouteWithChildren
   '/company': typeof CompanyRouteWithChildren
+  '/demo': typeof DemoRoute
   '/for-candidates': typeof ForCandidatesRoute
   '/for-companies': typeof ForCompaniesRoute
   '/for-universities': typeof ForUniversitiesRoute
@@ -410,6 +417,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/book-demo': typeof BookDemoRoute
+  '/demo': typeof DemoRoute
   '/for-candidates': typeof ForCandidatesRoute
   '/for-companies': typeof ForCompaniesRoute
   '/for-universities': typeof ForUniversitiesRoute
@@ -466,6 +474,7 @@ export interface FileRoutesById {
   '/book-demo': typeof BookDemoRoute
   '/candidate': typeof CandidateRouteWithChildren
   '/company': typeof CompanyRouteWithChildren
+  '/demo': typeof DemoRoute
   '/for-candidates': typeof ForCandidatesRoute
   '/for-companies': typeof ForCompaniesRoute
   '/for-universities': typeof ForUniversitiesRoute
@@ -526,6 +535,7 @@ export interface FileRouteTypes {
     | '/book-demo'
     | '/candidate'
     | '/company'
+    | '/demo'
     | '/for-candidates'
     | '/for-companies'
     | '/for-universities'
@@ -582,6 +592,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/book-demo'
+    | '/demo'
     | '/for-candidates'
     | '/for-companies'
     | '/for-universities'
@@ -637,6 +648,7 @@ export interface FileRouteTypes {
     | '/book-demo'
     | '/candidate'
     | '/company'
+    | '/demo'
     | '/for-candidates'
     | '/for-companies'
     | '/for-universities'
@@ -696,6 +708,7 @@ export interface RootRouteChildren {
   BookDemoRoute: typeof BookDemoRoute
   CandidateRoute: typeof CandidateRouteWithChildren
   CompanyRoute: typeof CompanyRouteWithChildren
+  DemoRoute: typeof DemoRoute
   ForCandidatesRoute: typeof ForCandidatesRoute
   ForCompaniesRoute: typeof ForCompaniesRoute
   ForUniversitiesRoute: typeof ForUniversitiesRoute
@@ -745,6 +758,13 @@ declare module '@tanstack/react-router' {
       path: '/for-candidates'
       fullPath: '/for-candidates'
       preLoaderRoute: typeof ForCandidatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/company': {
@@ -1239,6 +1259,7 @@ const rootRouteChildren: RootRouteChildren = {
   BookDemoRoute: BookDemoRoute,
   CandidateRoute: CandidateRouteWithChildren,
   CompanyRoute: CompanyRouteWithChildren,
+  DemoRoute: DemoRoute,
   ForCandidatesRoute: ForCandidatesRoute,
   ForCompaniesRoute: ForCompaniesRoute,
   ForUniversitiesRoute: ForUniversitiesRoute,
