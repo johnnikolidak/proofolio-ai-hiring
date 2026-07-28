@@ -1,8 +1,6 @@
 import { defineTool } from "@lovable.dev/mcp-js";
-import { defineTool as _unused } from "@lovable.dev/mcp-js";
 import { errorResult, supabaseForUser, textResult } from "../supabase";
 
-void _unused;
 
 export default defineTool({
   name: "list_my_certificates",

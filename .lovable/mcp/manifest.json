@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "sdk_version": "0.25.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://tmhytbcucyzsadztafza.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "proofolio-mcp",
+      "version": "0.1.0",
+      "title": "Proofolio"
+    },
+    "tools": [
+      {
+        "name": "list_jobs",
+        "title": "List jobs",
+        "description": "List published jobs on Proofolio. Optionally filter by a search term matching title, company or location, and by remote-only.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "search": {
+              "description": "Free-text filter on job title, company name or location.",
+              "type": "string"
+            },
+            "remote_only": {
+              "description": "Only return remote jobs.",
+              "type": "boolean"
+            },
+            "limit": {
+              "description": "Maximum number of jobs to return (default 20, max 50).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_job",
+        "title": "Get job details",
+        "description": "Fetch the full description, requirements and metadata for one Proofolio job by its id.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "job_id": {
+              "type": "string",
+              "description": "The job id returned by list_jobs."
+            }
+          },
+          "required": [
+            "job_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_challenges",
+        "title": "List challenges",
+        "description": "List published skill challenges on Proofolio, optionally filtered by role, industry or difficulty.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "role": {
+              "description": "Filter by the role a challenge targets, e.g. 'Product Designer'.",
+              "type": "string"
+            },
+            "industry": {
+              "description": "Filter by industry.",
+              "type": "string"
+            },
+            "difficulty": {
+              "description": "Filter by difficulty label, e.g. 'easy', 'medium', 'hard'.",
+              "type": "string"
+            },
+            "limit": {
+              "description": "Maximum number of challenges to return (default 20, max 50).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_applications",
+        "title": "List my applications",
+        "description": "List the signed-in user's job applications on Proofolio, including the current pipeline status.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "status": {
+              "description": "Filter by application status, e.g. 'applied', 'shortlisted'.",
+              "type": "string"
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_certificates",
+        "title": "List my certificates",
+        "description": "List the proof certificates earned by the signed-in user, with score and public verification code.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "apply_to_job",
+        "title": "Apply to a job",
+        "description": "Submit an application to a published Proofolio job on behalf of the signed-in candidate.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "job_id": {
+              "type": "string",
+              "description": "The job id to apply to."
+            },
+            "cover_note": {
+              "description": "Optional short cover note sent with the application.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "job_id"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

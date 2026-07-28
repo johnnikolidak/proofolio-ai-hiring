@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UniversityRouteImport } from './routes/university'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ForUniversitiesRouteImport } from './routes/for-universities'
 import { Route as ForCompaniesRouteImport } from './routes/for-companies'
 import { Route as ForCandidatesRouteImport } from './routes/for-candidates'
@@ -62,10 +63,13 @@ import { Route as AuthSignupRouteImport } from './routes/auth.signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as CandidateJobsIndexRouteImport } from './routes/candidate.jobs.index'
 import { Route as CandidateChallengesIndexRouteImport } from './routes/candidate.challenges.index'
 import { Route as CandidateJobsIdRouteImport } from './routes/candidate.jobs.$id'
 import { Route as CandidateChallengesIdRouteImport } from './routes/candidate.challenges.$id'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 
 const UniversityRoute = UniversityRouteImport.update({
   id: '/university',
@@ -75,6 +79,11 @@ const UniversityRoute = UniversityRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForUniversitiesRoute = ForUniversitiesRouteImport.update({
@@ -332,6 +341,18 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   path: '/auth/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const CandidateJobsIndexRoute = CandidateJobsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -353,6 +374,12 @@ const CandidateChallengesIdRoute = CandidateChallengesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => CandidateChallengesRoute,
 } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -364,8 +391,11 @@ export interface FileRoutesByFullPath {
   '/for-candidates': typeof ForCandidatesRoute
   '/for-companies': typeof ForCompaniesRoute
   '/for-universities': typeof ForUniversitiesRoute
+  '/mcp': typeof McpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/university': typeof UniversityRouteWithChildren
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -408,6 +438,7 @@ export interface FileRoutesByFullPath {
   '/candidate/': typeof CandidateIndexRoute
   '/company/': typeof CompanyIndexRoute
   '/university/': typeof UniversityIndexRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/candidate/challenges/$id': typeof CandidateChallengesIdRoute
   '/candidate/jobs/$id': typeof CandidateJobsIdRoute
   '/candidate/challenges/': typeof CandidateChallengesIndexRoute
@@ -421,7 +452,10 @@ export interface FileRoutesByTo {
   '/for-candidates': typeof ForCandidatesRoute
   '/for-companies': typeof ForCompaniesRoute
   '/for-universities': typeof ForUniversitiesRoute
+  '/mcp': typeof McpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -462,6 +496,7 @@ export interface FileRoutesByTo {
   '/candidate': typeof CandidateIndexRoute
   '/company': typeof CompanyIndexRoute
   '/university': typeof UniversityIndexRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/candidate/challenges/$id': typeof CandidateChallengesIdRoute
   '/candidate/jobs/$id': typeof CandidateJobsIdRoute
   '/candidate/challenges': typeof CandidateChallengesIndexRoute
@@ -478,8 +513,11 @@ export interface FileRoutesById {
   '/for-candidates': typeof ForCandidatesRoute
   '/for-companies': typeof ForCompaniesRoute
   '/for-universities': typeof ForUniversitiesRoute
+  '/mcp': typeof McpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/university': typeof UniversityRouteWithChildren
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -522,6 +560,7 @@ export interface FileRoutesById {
   '/candidate/': typeof CandidateIndexRoute
   '/company/': typeof CompanyIndexRoute
   '/university/': typeof UniversityIndexRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/candidate/challenges/$id': typeof CandidateChallengesIdRoute
   '/candidate/jobs/$id': typeof CandidateJobsIdRoute
   '/candidate/challenges/': typeof CandidateChallengesIndexRoute
@@ -539,8 +578,11 @@ export interface FileRouteTypes {
     | '/for-candidates'
     | '/for-companies'
     | '/for-universities'
+    | '/mcp'
     | '/sitemap.xml'
     | '/university'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -583,6 +625,7 @@ export interface FileRouteTypes {
     | '/candidate/'
     | '/company/'
     | '/university/'
+    | '/.mcp/invoke-tool/$tool'
     | '/candidate/challenges/$id'
     | '/candidate/jobs/$id'
     | '/candidate/challenges/'
@@ -596,7 +639,10 @@ export interface FileRouteTypes {
     | '/for-candidates'
     | '/for-companies'
     | '/for-universities'
+    | '/mcp'
     | '/sitemap.xml'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -637,6 +683,7 @@ export interface FileRouteTypes {
     | '/candidate'
     | '/company'
     | '/university'
+    | '/.mcp/invoke-tool/$tool'
     | '/candidate/challenges/$id'
     | '/candidate/jobs/$id'
     | '/candidate/challenges'
@@ -652,8 +699,11 @@ export interface FileRouteTypes {
     | '/for-candidates'
     | '/for-companies'
     | '/for-universities'
+    | '/mcp'
     | '/sitemap.xml'
     | '/university'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -696,6 +746,7 @@ export interface FileRouteTypes {
     | '/candidate/'
     | '/company/'
     | '/university/'
+    | '/.mcp/invoke-tool/$tool'
     | '/candidate/challenges/$id'
     | '/candidate/jobs/$id'
     | '/candidate/challenges/'
@@ -712,8 +763,11 @@ export interface RootRouteChildren {
   ForCandidatesRoute: typeof ForCandidatesRoute
   ForCompaniesRoute: typeof ForCompaniesRoute
   ForUniversitiesRoute: typeof ForUniversitiesRoute
+  McpRoute: typeof McpRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UniversityRoute: typeof UniversityRouteWithChildren
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
@@ -721,6 +775,7 @@ export interface RootRouteChildren {
   AuthVerifyEmailRoute: typeof AuthVerifyEmailRoute
   PIdRoute: typeof PIdRoute
   VerifyCodeRoute: typeof VerifyCodeRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -737,6 +792,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/for-universities': {
@@ -1096,6 +1158,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/candidate/jobs/': {
       id: '/candidate/jobs/'
       path: '/'
@@ -1123,6 +1199,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/candidate/challenges/$id'
       preLoaderRoute: typeof CandidateChallengesIdRouteImport
       parentRoute: typeof CandidateChallengesRoute
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -1263,8 +1346,12 @@ const rootRouteChildren: RootRouteChildren = {
   ForCandidatesRoute: ForCandidatesRoute,
   ForCompaniesRoute: ForCompaniesRoute,
   ForUniversitiesRoute: ForUniversitiesRoute,
+  McpRoute: McpRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UniversityRoute: UniversityRouteWithChildren,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
@@ -1272,6 +1359,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthVerifyEmailRoute: AuthVerifyEmailRoute,
   PIdRoute: PIdRoute,
   VerifyCodeRoute: VerifyCodeRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
