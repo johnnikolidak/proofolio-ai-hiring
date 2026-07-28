@@ -12,7 +12,7 @@ import { useRedirectIfAuthed, dashboardPathFor } from "@/hooks/use-guest";
 
 export const Route = createFileRoute("/auth/login")({
   component: Login,
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): { next?: string } => ({
     next: typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//") ? s.next : undefined,
   }),
   head: () => ({ meta: [{ title: "Sign in — Proofolio" }] }),
