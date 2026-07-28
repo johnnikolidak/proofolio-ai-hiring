@@ -12,8 +12,12 @@ import { useRedirectIfAuthed, dashboardPathFor } from "@/hooks/use-guest";
 
 export const Route = createFileRoute("/auth/login")({
   component: Login,
+  validateSearch: (s: Record<string, unknown>): { next?: string } => ({
+    next: typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//") ? s.next : undefined,
+  }),
   head: () => ({ meta: [{ title: "Sign in — Proofolio" }] }),
 });
+
 
 const schema = z.object({
   email: z.string().trim().email("Enter a valid email"),
@@ -21,9 +25,11 @@ const schema = z.object({
 });
 
 function Login() {
-  useRedirectIfAuthed();
+  const { next } = Route.useSearch();
+  useRedirectIfAuthed(next);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,6 +52,14 @@ function Login() {
       return;
     }
 
+    // Return to an OAuth consent (or other) flow when one was preserved.
+    if (next) {
+      setLoading(false);
+      toast.success("Welcome back");
+      window.location.href = next;
+      return;
+    }
+
     // Determine destination from role
     const userId = data.user.id;
     const [{ data: adminRow }, { data: profileRow }] = await Promise.all([
@@ -56,6 +70,7 @@ function Login() {
     toast.success("Welcome back");
     const dest = dashboardPathFor({ isAdmin: !!adminRow, role: profileRow?.role });
     navigate({ to: dest });
+
   };
 
   return (

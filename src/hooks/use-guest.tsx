@@ -11,12 +11,18 @@ export function dashboardPathFor(opts: { isAdmin?: boolean; role?: string | null
   return "/candidate";
 }
 
-export function useRedirectIfAuthed() {
+export function useRedirectIfAuthed(next?: string) {
   const { loading, session, profile, isAdmin } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
     if (loading || !session) return;
+    // A preserved same-origin relative path (e.g. an OAuth consent URL) wins.
+    if (next && next.startsWith("/") && !next.startsWith("//")) {
+      window.location.href = next;
+      return;
+    }
     const dest = dashboardPathFor({ isAdmin, role: profile?.role });
     navigate({ to: dest, replace: true });
-  }, [loading, session, profile, isAdmin, navigate]);
+  }, [loading, session, profile, isAdmin, navigate, next]);
 }
+
