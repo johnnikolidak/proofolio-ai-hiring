@@ -70,6 +70,7 @@ import { Route as CandidateChallengesIndexRouteImport } from './routes/candidate
 import { Route as CandidateJobsIdRouteImport } from './routes/candidate.jobs.$id'
 import { Route as CandidateChallengesIdRouteImport } from './routes/candidate.challenges.$id'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 
 const UniversityRoute = UniversityRouteImport.update({
   id: '/university',
@@ -380,6 +381,11 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -438,6 +444,7 @@ export interface FileRoutesByFullPath {
   '/candidate/': typeof CandidateIndexRoute
   '/company/': typeof CompanyIndexRoute
   '/university/': typeof UniversityIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/candidate/challenges/$id': typeof CandidateChallengesIdRoute
   '/candidate/jobs/$id': typeof CandidateJobsIdRoute
@@ -496,6 +503,7 @@ export interface FileRoutesByTo {
   '/candidate': typeof CandidateIndexRoute
   '/company': typeof CompanyIndexRoute
   '/university': typeof UniversityIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/candidate/challenges/$id': typeof CandidateChallengesIdRoute
   '/candidate/jobs/$id': typeof CandidateJobsIdRoute
@@ -560,6 +568,7 @@ export interface FileRoutesById {
   '/candidate/': typeof CandidateIndexRoute
   '/company/': typeof CompanyIndexRoute
   '/university/': typeof UniversityIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/candidate/challenges/$id': typeof CandidateChallengesIdRoute
   '/candidate/jobs/$id': typeof CandidateJobsIdRoute
@@ -625,6 +634,7 @@ export interface FileRouteTypes {
     | '/candidate/'
     | '/company/'
     | '/university/'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/candidate/challenges/$id'
     | '/candidate/jobs/$id'
@@ -683,6 +693,7 @@ export interface FileRouteTypes {
     | '/candidate'
     | '/company'
     | '/university'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/candidate/challenges/$id'
     | '/candidate/jobs/$id'
@@ -746,6 +757,7 @@ export interface FileRouteTypes {
     | '/candidate/'
     | '/company/'
     | '/university/'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/candidate/challenges/$id'
     | '/candidate/jobs/$id'
@@ -775,6 +787,7 @@ export interface RootRouteChildren {
   AuthVerifyEmailRoute: typeof AuthVerifyEmailRoute
   PIdRoute: typeof PIdRoute
   VerifyCodeRoute: typeof VerifyCodeRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 
@@ -1207,6 +1220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1359,6 +1379,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthVerifyEmailRoute: AuthVerifyEmailRoute,
   PIdRoute: PIdRoute,
   VerifyCodeRoute: VerifyCodeRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
 }
 export const routeTree = rootRouteImport
