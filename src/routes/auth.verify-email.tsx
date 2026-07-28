@@ -27,11 +27,13 @@ function VerifyEmail() {
       const uid = session.user.id;
       const [{ data: adminRow }, { data: profileRow }] = await Promise.all([
         supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin").maybeSingle(),
-        supabase.from("profiles").select("role").eq("id", uid).maybeSingle(),
+        supabase.from("profiles").select("role,completion_pct").eq("id", uid).maybeSingle(),
       ]);
       toast.success("Email verified");
       if (adminRow) navigate({ to: "/admin", replace: true });
       else if (profileRow?.role === "company") navigate({ to: "/company", replace: true });
+      else if (profileRow?.role === "university") navigate({ to: "/university", replace: true });
+      else if ((profileRow?.completion_pct ?? 0) < 100) navigate({ to: "/onboarding", replace: true });
       else navigate({ to: "/candidate", replace: true });
     });
     return () => sub.subscription.unsubscribe();

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UniversityRouteImport } from './routes/university'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ForUniversitiesRouteImport } from './routes/for-universities'
 import { Route as ForCompaniesRouteImport } from './routes/for-companies'
 import { Route as ForCandidatesRouteImport } from './routes/for-candidates'
@@ -75,6 +76,11 @@ const UniversityRoute = UniversityRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForUniversitiesRoute = ForUniversitiesRouteImport.update({
@@ -364,6 +370,7 @@ export interface FileRoutesByFullPath {
   '/for-candidates': typeof ForCandidatesRoute
   '/for-companies': typeof ForCompaniesRoute
   '/for-universities': typeof ForUniversitiesRoute
+  '/onboarding': typeof OnboardingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/university': typeof UniversityRouteWithChildren
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -421,6 +428,7 @@ export interface FileRoutesByTo {
   '/for-candidates': typeof ForCandidatesRoute
   '/for-companies': typeof ForCompaniesRoute
   '/for-universities': typeof ForUniversitiesRoute
+  '/onboarding': typeof OnboardingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -478,6 +486,7 @@ export interface FileRoutesById {
   '/for-candidates': typeof ForCandidatesRoute
   '/for-companies': typeof ForCompaniesRoute
   '/for-universities': typeof ForUniversitiesRoute
+  '/onboarding': typeof OnboardingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/university': typeof UniversityRouteWithChildren
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -539,6 +548,7 @@ export interface FileRouteTypes {
     | '/for-candidates'
     | '/for-companies'
     | '/for-universities'
+    | '/onboarding'
     | '/sitemap.xml'
     | '/university'
     | '/auth/forgot-password'
@@ -596,6 +606,7 @@ export interface FileRouteTypes {
     | '/for-candidates'
     | '/for-companies'
     | '/for-universities'
+    | '/onboarding'
     | '/sitemap.xml'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -652,6 +663,7 @@ export interface FileRouteTypes {
     | '/for-candidates'
     | '/for-companies'
     | '/for-universities'
+    | '/onboarding'
     | '/sitemap.xml'
     | '/university'
     | '/auth/forgot-password'
@@ -712,6 +724,7 @@ export interface RootRouteChildren {
   ForCandidatesRoute: typeof ForCandidatesRoute
   ForCompaniesRoute: typeof ForCompaniesRoute
   ForUniversitiesRoute: typeof ForUniversitiesRoute
+  OnboardingRoute: typeof OnboardingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UniversityRoute: typeof UniversityRouteWithChildren
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
@@ -737,6 +750,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/for-universities': {
@@ -1263,6 +1283,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForCandidatesRoute: ForCandidatesRoute,
   ForCompaniesRoute: ForCompaniesRoute,
   ForUniversitiesRoute: ForUniversitiesRoute,
+  OnboardingRoute: OnboardingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UniversityRoute: UniversityRouteWithChildren,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,

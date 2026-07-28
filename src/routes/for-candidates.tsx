@@ -21,7 +21,7 @@ export const Route = createFileRoute("/for-candidates")({
 
 function ForCandidates() {
   const { session, profile, isAdmin } = useAuth();
-  const dash = dashboardPathFor({ isAdmin, role: profile?.role });
+  const dash = dashboardPathFor({ isAdmin, role: profile?.role, completionPct: profile?.completion_pct });
   return (
     <div className="min-h-screen">
       <SiteHeader />

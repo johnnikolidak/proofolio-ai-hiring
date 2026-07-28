@@ -50,7 +50,7 @@ function Login() {
     const userId = data.user.id;
     const [{ data: adminRow }, { data: profileRow }] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle(),
-      supabase.from("profiles").select("role").eq("id", userId).maybeSingle(),
+      supabase.from("profiles").select("role,completion_pct").eq("id", userId).maybeSingle(),
     ]);
     setLoading(false);
     toast.success("Welcome back");
@@ -58,6 +58,10 @@ function Login() {
       navigate({ to: "/admin" });
     } else if (profileRow?.role === "company") {
       navigate({ to: "/company" });
+    } else if (profileRow?.role === "university") {
+      navigate({ to: "/university" });
+    } else if ((profileRow?.completion_pct ?? 0) < 100) {
+      navigate({ to: "/onboarding" });
     } else {
       navigate({ to: "/candidate" });
     }

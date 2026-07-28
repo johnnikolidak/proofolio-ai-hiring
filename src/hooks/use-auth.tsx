@@ -11,6 +11,7 @@ export type Profile = {
   role: ProfileRole;
   company_name: string | null;
   avatar_url: string | null;
+  completion_pct: number;
 };
 
 type AuthContextValue = {
@@ -27,7 +28,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 async function loadProfileAndAdmin(userId: string): Promise<{ profile: Profile | null; isAdmin: boolean }> {
   const [{ data: profileRow }, { data: roleRow }] = await Promise.all([
-    supabase.from("profiles").select("id,email,full_name,role,company_name,avatar_url").eq("id", userId).maybeSingle(),
+    supabase.from("profiles").select("id,email,full_name,role,company_name,avatar_url,completion_pct").eq("id", userId).maybeSingle(),
     supabase.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle(),
   ]);
   return {

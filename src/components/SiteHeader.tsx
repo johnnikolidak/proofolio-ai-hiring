@@ -27,7 +27,7 @@ export function SiteHeader() {
   const { session, profile, isAdmin, signOut, loading } = useAuth();
   const navigate = useNavigate();
 
-  const dashboardHref = dashboardPathFor({ isAdmin, role: profile?.role });
+  const dashboardHref = dashboardPathFor({ isAdmin, role: profile?.role, completionPct: profile?.completion_pct });
   const initials = (profile?.full_name || profile?.email || session?.user?.email || "?")
     .split(" ")
     .map((n) => n[0])

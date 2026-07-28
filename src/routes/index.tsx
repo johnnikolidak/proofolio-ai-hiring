@@ -84,7 +84,7 @@ const paths = [
 
 function Landing() {
   const { session, profile, isAdmin } = useAuth();
-  const dash = dashboardPathFor({ isAdmin, role: profile?.role });
+  const dash = dashboardPathFor({ isAdmin, role: profile?.role, completionPct: profile?.completion_pct });
 
   return (
     <div className="min-h-screen">
