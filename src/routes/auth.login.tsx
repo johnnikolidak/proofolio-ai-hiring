@@ -12,8 +12,12 @@ import { useRedirectIfAuthed, dashboardPathFor } from "@/hooks/use-guest";
 
 export const Route = createFileRoute("/auth/login")({
   component: Login,
+  validateSearch: (s: Record<string, unknown>) => ({
+    next: typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//") ? s.next : undefined,
+  }),
   head: () => ({ meta: [{ title: "Sign in — Proofolio" }] }),
 });
+
 
 const schema = z.object({
   email: z.string().trim().email("Enter a valid email"),
