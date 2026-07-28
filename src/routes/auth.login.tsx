@@ -25,9 +25,11 @@ const schema = z.object({
 });
 
 function Login() {
-  useRedirectIfAuthed();
+  const { next } = Route.useSearch();
+  useRedirectIfAuthed(next);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -50,6 +52,14 @@ function Login() {
       return;
     }
 
+    // Return to an OAuth consent (or other) flow when one was preserved.
+    if (next) {
+      setLoading(false);
+      toast.success("Welcome back");
+      window.location.href = next;
+      return;
+    }
+
     // Determine destination from role
     const userId = data.user.id;
     const [{ data: adminRow }, { data: profileRow }] = await Promise.all([
@@ -60,6 +70,7 @@ function Login() {
     toast.success("Welcome back");
     const dest = dashboardPathFor({ isAdmin: !!adminRow, role: profileRow?.role });
     navigate({ to: dest });
+
   };
 
   return (
